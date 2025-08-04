@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
-import { Navigation, HomePage, LoginPage } from './components'
+import { Navigation, HomePage, LoginPage, RegisterPage } from './components'
 import type { AppUser } from './models'
 
 function App() {
@@ -17,6 +17,14 @@ function App() {
       localStorage.setItem('authToken', token)
     }
     console.log('User logged in:', user)
+  }
+
+  const handleRegisterSuccess = (user: AppUser) => {
+    // For registration, we might want to auto-login the user or just redirect to login
+    // Here we'll just log the success and let the RegisterPage handle the redirect
+    console.log('User registered successfully:', user)
+    // Optionally, you could auto-login the user here:
+    // handleLoginSuccess(user, token)
   }
 
   const handleLogout = () => {
@@ -42,12 +50,15 @@ function App() {
             path="/login" 
             element={<LoginPage onLoginSuccess={handleLoginSuccess} />} 
           />
+          <Route 
+            path="/register" 
+            element={<RegisterPage onRegisterSuccess={handleRegisterSuccess} />} 
+          />
           {/* Placeholder routes for future pages */}
           <Route path="/events" element={<div className="p-8 text-center">Events page coming soon!</div>} />
           <Route path="/my-registrations" element={<div className="p-8 text-center">My Registrations page coming soon!</div>} />
           <Route path="/manage-events" element={<div className="p-8 text-center">Manage Events page coming soon!</div>} />
           <Route path="/dashboard" element={<div className="p-8 text-center">Dashboard page coming soon!</div>} />
-          <Route path="/register" element={<div className="p-8 text-center">Registration page coming soon!</div>} />
           <Route path="*" element={<div className="p-8 text-center">Page not found!</div>} />
         </Routes>
       </div>
