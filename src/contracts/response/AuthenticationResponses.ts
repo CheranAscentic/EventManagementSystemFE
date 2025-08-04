@@ -1,15 +1,32 @@
 // Authentication response interfaces
-import type { AppUser } from "../../models/AppUser";
+import type { ApiResponse } from '../../types';
 
-export interface LoginResponse {
-  user: AppUser;
-  token?: string; // JWT token if using token-based authentication
-  success: boolean;
-  message?: string;
+// Login response data structure
+export interface LoginData {
+  id: string;
+  email: string;
+  userName: string;
+  token: string;
+  tokenExpiration: string;
+  firstName: string | null;
+  lastName: string | null;
+  phoneNumber: string | null;
+  userRole: string;
 }
 
-export interface RegisterResponse {
-  user: AppUser;
-  success: boolean;
-  message?: string;
+// Registration response data structure
+export interface RegisterData {
+  id: string;
+  email: string;
+  userName: string;
+  token: string;
+  tokenExpiration: string;
+  firstName: string | null;
+  lastName: string | null;
+  phoneNumber: string | null;
+  userRole: string;
 }
+
+// Standardized response types
+export type LoginResponse = ApiResponse<LoginData>;
+export type RegisterResponse = ApiResponse<RegisterData>;

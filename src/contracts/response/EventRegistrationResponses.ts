@@ -1,32 +1,17 @@
 // Event registration response interfaces
+import type { ApiResponse } from '../../types';
 import type { EventRegistration } from "../../models/EventRegistration";
 
-export interface RegisterForEventResponse {
-  registration: EventRegistration;
-  success: boolean;
-  message?: string;
-}
-
-export interface CancelEventRegistrationResponse {
-  success: boolean;
-  message?: string;
-}
-
-export interface GetUserEventRegistrationsResponse {
-  registrations: EventRegistration[];
-  success: boolean;
-  message?: string;
-}
-
-export interface GetEventRegistrationsResponse {
-  registrations: EventRegistration[];
-  success: boolean;
-  message?: string;
-}
-
-export interface UploadEventImageResponse {
-  imageId: string;
+// Event image upload data structure
+export interface EventImageData {
+  id: string;
+  eventId: string;
   imageUrl: string;
-  success: boolean;
-  message?: string;
 }
+
+// Standardized response types using generics
+export type RegisterForEventResponse = ApiResponse<EventRegistration>;
+export type CancelEventRegistrationResponse = ApiResponse<null>;
+export type GetUserEventRegistrationsResponse = ApiResponse<EventRegistration[]>;
+export type GetEventRegistrationsResponse = ApiResponse<EventRegistration[]>;
+export type UploadEventImageResponse = ApiResponse<EventImageData>;

@@ -1,31 +1,10 @@
 // Event response interfaces
+import type { ApiResponse } from '../../types';
 import type { Event } from "../../models/Event";
 
-export interface CreateEventResponse {
-  event: Event;
-  success: boolean;
-  message?: string;
-}
-
-export interface UpdateEventResponse {
-  event: Event;
-  success: boolean;
-  message?: string;
-}
-
-export interface DeleteEventResponse {
-  success: boolean;
-  message?: string;
-}
-
-export interface GetEventResponse {
-  event: Event;
-  success: boolean;
-  message?: string;
-}
-
-export interface GetAllEventsResponse {
-  events: Event[];
-  success: boolean;
-  message?: string;
-}
+// Standardized response types using generics
+export type CreateEventResponse = ApiResponse<Event>;
+export type UpdateEventResponse = ApiResponse<Event>;
+export type DeleteEventResponse = ApiResponse<null>;
+export type GetEventResponse = ApiResponse<Event>;
+export type GetAllEventsResponse = ApiResponse<Event[]>;

@@ -46,7 +46,7 @@ export class ApiService {
   private baseUrl: string;
   private authToken?: string;
 
-  constructor(baseUrl: string = "http://localhost:5000") {
+  constructor(baseUrl: string = "http://localhost:5042") {
     this.baseUrl = baseUrl;
   }
 
@@ -81,14 +81,23 @@ export class ApiService {
       headers,
     };
 
+    console.log(`Making request to ${url} with options:`, config);
+
     try {
       const response = await fetch(url, config);
+      console.log(`Response from ${url}:`, response);
+      
+      // Always parse JSON first
+      const data = await response.json();
+      console.log('Parsed response data:', data);
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Handle error responses with your backend structure
+        const errorMessage = data?.error || data?.message || `HTTP error! status: ${response.status}`;
+        throw new Error(errorMessage);
       }
 
-      return await response.json();
+      return data;
     } catch (error) {
       console.error("API request failed:", error);
       throw error;
