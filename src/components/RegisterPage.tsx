@@ -75,13 +75,13 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
       
       // Convert backend response to AppUser format
       const user: AppUser = {
-        userId: registerData.id,
+        userId: registerData.userId,
         email: registerData.email,
         userName: registerData.userName,
-        firstName: registerData.firstName || '',
-        lastName: registerData.lastName || '',
-        userRole: registerData.userRole || 'User',
-        phoneNumber: registerData.phoneNumber || '',
+        firstName: registerData.firstName,
+        lastName: registerData.lastName,
+        userRole: registerData.userRole,
+        phoneNumber: registerData.phoneNumber,
       };
       
       // Handle successful registration

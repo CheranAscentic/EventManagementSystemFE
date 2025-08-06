@@ -60,19 +60,23 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
       const loginData = ApiResponseHandler.handleResponse(response);
       console.log('Login successful:', loginData);
       
-      // Convert backend response to AppUser format
+      // Extract user and token from the response
+      // The user data is directly in loginData, not nested under loginData.user
       const user: AppUser = {
         userId: loginData.id,
         email: loginData.email,
         userName: loginData.userName,
-        firstName: loginData.firstName || '',
-        lastName: loginData.lastName || '',
-        userRole: loginData.userRole || 'User',
-        phoneNumber: loginData.phoneNumber || '',
+        firstName: loginData.firstName,
+        lastName: loginData.lastName,
+        userRole: loginData.userRole,
+        phoneNumber: loginData.phoneNumber,
+        token: loginData.token,
+        tokenExpiration: loginData.tokenExpiration
       };
+      const token = loginData.token;
       
       // Handle successful login
-      onLoginSuccess?.(user, loginData.token);
+      onLoginSuccess?.(user, token);
       
       // Redirect to home page or dashboard
       navigate('/');

@@ -1,5 +1,6 @@
 export interface Event {
   id: string;
+  adminId: string;
   title: string;
   description: string;
   eventDate: string;
@@ -9,5 +10,5 @@ export interface Event {
   isOpenForRegistration: boolean;
   registrationCutoffDate: string;
   noOfRegistrations: number;
-  image?: string | null;
+  imageUrl?: string | null;
 }

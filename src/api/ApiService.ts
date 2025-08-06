@@ -40,24 +40,79 @@ import type {
   GetAllEventsResponse,
 } from "../contracts/response/EventResponses";
 
+import type {
+  GetEventTypesResponse,
+} from "../contracts/response/EventTypeResponses";
+
+import type {
+  GetOwnerEventsResponse,
+} from "../contracts/response/OwnerEventResponses";
+
 // Model interfaces are used implicitly through response interfaces
 
 export class ApiService {
   private baseUrl: string;
   private authToken?: string;
 
-  constructor(baseUrl: string = "http://localhost:5042") {
+  constructor(baseUrl: string = "https://localhost:7049") {
     this.baseUrl = baseUrl;
+    
+    // Load existing token from AppUser storage if available
+    const storedUserData = localStorage.getItem('AppUser');
+    if (storedUserData) {
+      try {
+        const appUser = JSON.parse(storedUserData);
+        if (appUser.token && appUser.tokenExpiration) {
+          // Check if token is still valid
+          const expirationDate = new Date(appUser.tokenExpiration);
+          const currentDate = new Date();
+          
+          if (expirationDate > currentDate) {
+            this.authToken = appUser.token;
+          } else {
+            // Token expired, clean up
+            localStorage.removeItem('AppUser');
+            console.log('Token expired during ApiService initialization');
+          }
+        }
+      } catch (error) {
+        console.error('Error parsing stored user data in ApiService:', error);
+        localStorage.removeItem('AppUser');
+      }
+    } else {
+      // Fallback: check for old token-only storage
+      this.authToken = localStorage.getItem('authToken') || undefined;
+      if (this.authToken) {
+        console.log('Found old token storage, consider migrating to AppUser storage');
+      }
+    }
   }
 
   // Set authentication token
-  setAuthToken(token: string) {
+  setAuthToken(token: string | undefined) {
     this.authToken = token;
+    
+    // This method is now mainly for compatibility
+    // The preferred approach is to store the complete AppUser object in localStorage
+    // from the App component's authentication handlers
+    if (token) {
+      // Only store token if no AppUser is already stored
+      const storedUserData = localStorage.getItem('AppUser');
+      if (!storedUserData) {
+        localStorage.setItem('authToken', token);
+      }
+    } else {
+      // Clear all authentication data
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('AppUser');
+    }
   }
 
   // Clear authentication token
   clearAuthToken() {
     this.authToken = undefined;
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('AppUser');
   }
 
   // Generic HTTP request method
@@ -193,6 +248,17 @@ export class ApiService {
 
   async getAllEvents(): Promise<GetAllEventsResponse> {
     return this.request<GetAllEventsResponse>("/api/events/");
+  }
+
+  async getEventTypes(): Promise<GetEventTypesResponse> {
+    return this.request<GetEventTypesResponse>("/api/events/types");
+  }
+
+  // Owner Event Methods
+  async getOwnerEvents(ownerId: string = "any-guid"): Promise<GetOwnerEventsResponse> {
+    // Note: The ownerId parameter is ignored by the backend - actual owner comes from JWT token
+    // We include it to match the endpoint URL structure: /api/events/owner/{ownerId}
+    return this.request<GetOwnerEventsResponse>(`/api/events/owner/${ownerId}`);
   }
 }
 

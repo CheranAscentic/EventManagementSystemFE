@@ -8,6 +8,9 @@ import type {
   RegisterForEventRequest,
 } from "../contracts";
 
+// Re-export owner events examples for convenience
+export * from './OwnerEventsExamples';
+
 // Example: User Authentication
 export async function loginUser(email: string, password: string) {
   try {
@@ -74,11 +77,14 @@ export async function getAllEvents() {
 }
 
 // Example: Register for Event
-export async function registerForEvent(eventId: string, userId: string) {
+export async function registerForEvent(eventId: string, userId: string, name: string, email: string, phoneNumber: string) {
   try {
     const request: RegisterForEventRequest = {
       eventId,
       appUserId: userId,
+      name,
+      email,
+      phoneNumber,
     };
     
     const response = await apiService.registerForEvent(request);

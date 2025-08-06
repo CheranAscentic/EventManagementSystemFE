@@ -1,8 +1,11 @@
 // Event registration request interfaces
 
 export interface RegisterForEventRequest {
-  eventId: string;
   appUserId: string;
+  eventId: string;
+  name: string;
+  email: string;
+  phoneNumber: string;
 }
 
 export interface CancelEventRegistrationRequest {

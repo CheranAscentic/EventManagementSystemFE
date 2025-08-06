@@ -64,10 +64,10 @@ export function Navigation({
             {isLoggedIn && userRole === 'Admin' && (
               <>
                 <Link
-                  to="/manage-events"
+                  to="/admin/my-events"
                   className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
-                  Manage Events
+                  My Events
                 </Link>
                 <Link
                   to="/dashboard"
@@ -158,10 +158,10 @@ export function Navigation({
               {isLoggedIn && userRole === 'Admin' && (
                 <>
                   <Link
-                    to="/manage-events"
+                    to="/admin/my-events"
                     className="text-gray-600 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium transition-colors"
                   >
-                    Manage Events
+                    My Events
                   </Link>
                   <Link
                     to="/dashboard"

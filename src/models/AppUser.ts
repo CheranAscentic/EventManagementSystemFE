@@ -7,4 +7,6 @@ export interface AppUser {
   lastName: string;
   userRole: string;
   phoneNumber: string;
+  token?: string; // Optional token for authenticated requests
+  tokenExpiration?: string; // Optional token expiration for session management
 }
