@@ -1,92 +1,79 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../api';
 import { ApiResponseHandler, ApiError } from '../types';
 import type { Event } from '../models';
+import type { PaginatedResult } from '../contracts/response/GetEventsExtendedResponse';
 import { eventUtils, dateUtils } from '../lib/utils';
 
 export function EventsPage() {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
+  const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<Event> | null>(null);
   const [eventTypes, setEventTypes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(9); // Fixed items per page
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    loadInitialData();
-  }, []);
+  const loadEventTypes = async () => {
+    try {
+      const eventTypesResponse = await apiService.getEventTypes();
+      const eventTypesData = ApiResponseHandler.handleResponse(eventTypesResponse);
+      setEventTypes(eventTypesData || []);
+    } catch (error) {
+      console.error('Error loading event types:', error);
+      // Don't show error for event types failure, just log it
+    }
+  };
 
-  useEffect(() => {
-    filterEvents();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [events, searchTerm, selectedType, selectedStatus]);
-
-  const loadInitialData = async () => {
+  const loadEvents = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
       
-      // Load both events and event types in parallel
-      const [eventsResponse, eventTypesResponse] = await Promise.all([
-        apiService.getAllEvents(),
-        apiService.getEventTypes()
-      ]);
+      const request = {
+        itemsPerPage,
+        pageNumber: currentPage,
+        ...(searchTerm.trim().length >= 2 && { searchTerm: searchTerm.trim() }),
+        ...(selectedType && { eventType: selectedType }),
+        ...(startDate && { startDate: new Date(startDate).toISOString() }),
+        ...(endDate && { endDate: new Date(endDate).toISOString() }),
+      };
       
-      const eventsData = ApiResponseHandler.handleResponse(eventsResponse);
-      const eventTypesData = ApiResponseHandler.handleResponse(eventTypesResponse);
+      const response = await apiService.getEventsExtended(request);
       
-      console.log('Events loaded:', eventsData);
-      console.log('Event types loaded:', eventTypesData);
-      
-      setEvents(eventsData || []);
-      setEventTypes(eventTypesData || []);
+      if (response.isSuccess && response.value) {
+        console.log('Events loaded:', response.value);
+        setPaginatedResult(response.value);
+      } else {
+        setError(response.message || 'Failed to load events');
+        setPaginatedResult(null);
+      }
     } catch (error) {
-      console.error('Error loading initial data:', error);
+      console.error('Error loading events:', error);
       if (error instanceof ApiError) {
         setError(error.message);
       } else {
-        setError('Failed to load data. Please try again.');
+        setError('Failed to load events. Please try again.');
       }
+      setPaginatedResult(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, [itemsPerPage, currentPage, searchTerm, selectedType, startDate, endDate]);
 
-  const filterEvents = () => {
-    let filtered = events;
+  useEffect(() => {
+    loadEventTypes();
+  }, []);
 
-    // Filter by search term (title, description, location)
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(event =>
-        event.title.toLowerCase().includes(term) ||
-        event.description.toLowerCase().includes(term) ||
-        event.location.toLowerCase().includes(term)
-      );
-    }
-
-    // Filter by event type
-    if (selectedType) {
-      filtered = filtered.filter(event => event.type === selectedType);
-    }
-
-    // Filter by registration status
-    if (selectedStatus === 'open') {
-      filtered = filtered.filter(event => event.isOpenForRegistration);
-    } else if (selectedStatus === 'closed') {
-      filtered = filtered.filter(event => !event.isOpenForRegistration);
-    } else if (selectedStatus === 'full') {
-      filtered = filtered.filter(event => event.noOfRegistrations >= event.capacity);
-    } else if (selectedStatus === 'available') {
-      filtered = filtered.filter(event => eventUtils.canRegister(event));
-    }
-
-    setFilteredEvents(filtered);
-  };
+  useEffect(() => {
+    loadEvents();
+  }, [loadEvents]);
 
   const handleEventClick = (eventId: string) => {
     navigate(`/event/${eventId}`);
@@ -96,7 +83,33 @@ export function EventsPage() {
     setSearchTerm('');
     setSelectedType('');
     setSelectedStatus('');
+    setStartDate('');
+    setEndDate('');
+    setCurrentPage(1);
   };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1); // Reset to first page when searching
+  };
+
+  const handleTypeChange = (value: string) => {
+    setSelectedType(value);
+    setCurrentPage(1); // Reset to first page when filtering
+  };
+
+  const handleStatusChange = (value: string) => {
+    setSelectedStatus(value);
+    setCurrentPage(1); // Reset to first page when filtering
+  };
+
+  // Get the events from paginated result
+  const events = paginatedResult?.items || [];
+  const totalCount = paginatedResult?.totalCount || 0;
 
   if (loading) {
     return (
@@ -122,9 +135,9 @@ export function EventsPage() {
 
         {/* Search and Filters */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             {/* Search Input */}
-            <div className="md:col-span-2">
+            <div className="md:col-span-2 lg:col-span-2 xl:col-span-2">
               <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
                 Search Events
               </label>
@@ -134,7 +147,7 @@ export function EventsPage() {
                   id="search"
                   placeholder="Search by title, description, or location..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => handleSearchChange(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -153,7 +166,7 @@ export function EventsPage() {
               <select
                 id="type-filter"
                 value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
+                onChange={(e) => handleTypeChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">All Types</option>
@@ -171,7 +184,7 @@ export function EventsPage() {
               <select
                 id="status-filter"
                 value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
+                onChange={(e) => handleStatusChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">All Events</option>
@@ -181,13 +194,41 @@ export function EventsPage() {
                 <option value="closed">Closed</option>
               </select>
             </div>
+
+            {/* Start Date Filter */}
+            <div>
+              <label htmlFor="start-date" className="block text-sm font-medium text-gray-700 mb-2">
+                Start Date
+              </label>
+              <input
+                type="date"
+                id="start-date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            {/* End Date Filter */}
+            <div>
+              <label htmlFor="end-date" className="block text-sm font-medium text-gray-700 mb-2">
+                End Date
+              </label>
+              <input
+                type="date"
+                id="end-date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
           </div>
 
           {/* Filter Summary and Clear */}
-          {(searchTerm || selectedType || selectedStatus) && (
+          {(searchTerm || selectedType || selectedStatus || startDate || endDate) && (
             <div className="mt-4 flex items-center justify-between pt-4 border-t border-gray-200">
               <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <span>Showing {filteredEvents.length} of {events.length} events</span>
+                <span>Showing {events.length} of {totalCount} events</span>
                 {searchTerm && (
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
                     Search: "{searchTerm}"
@@ -201,6 +242,16 @@ export function EventsPage() {
                 {selectedStatus && (
                   <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded">
                     Status: {selectedStatus}
+                  </span>
+                )}
+                {startDate && (
+                  <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
+                    From: {new Date(startDate).toLocaleDateString()}
+                  </span>
+                )}
+                {endDate && (
+                  <span className="bg-red-100 text-red-800 px-2 py-1 rounded">
+                    Until: {new Date(endDate).toLocaleDateString()}
                   </span>
                 )}
               </div>
@@ -226,7 +277,7 @@ export function EventsPage() {
               <div className="ml-3">
                 <p className="text-sm text-red-800">{error}</p>
                 <button
-                  onClick={loadInitialData}
+                  onClick={loadEvents}
                   className="mt-2 text-sm text-red-600 hover:text-red-500 font-medium"
                 >
                   Try again
@@ -237,18 +288,18 @@ export function EventsPage() {
         )}
 
         {/* Events Grid */}
-        {filteredEvents.length === 0 ? (
+        {events.length === 0 ? (
           <div className="text-center py-12">
             <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             <h3 className="mt-2 text-sm font-medium text-gray-900">No events found</h3>
             <p className="mt-1 text-sm text-gray-500">
-              {searchTerm || selectedType || selectedStatus
+              {searchTerm || selectedType || selectedStatus || startDate || endDate
                 ? 'Try adjusting your search criteria.'
                 : 'No events are available at the moment.'}
             </p>
-            {(searchTerm || selectedType || selectedStatus) && (
+            {(searchTerm || selectedType || selectedStatus || startDate || endDate) && (
               <button
                 onClick={clearFilters}
                 className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
@@ -258,12 +309,13 @@ export function EventsPage() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEvents.map((event) => {
-              const capacityPercentage = eventUtils.getCapacityPercentage(event);
-              const capacityColor = eventUtils.getCapacityColorStyle(event);
-              const registrationStatus = eventUtils.getUIEventStatus(event);
-              const capacityLeft = eventUtils.getRemainingCapacity(event);
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {events.map((event) => {
+                const capacityPercentage = eventUtils.getCapacityPercentage(event);
+                const capacityColor = eventUtils.getCapacityColorStyle(event);
+                const registrationStatus = eventUtils.getUIEventStatus(event);
+                const capacityLeft = eventUtils.getRemainingCapacity(event);
 
               return (
                 <div
@@ -360,7 +412,98 @@ export function EventsPage() {
                 </div>
               );
             })}
-          </div>
+            </div>
+            
+            {/* Pagination */}
+            {paginatedResult && paginatedResult.totalPages > 1 && (
+              <div className="mt-8 flex items-center justify-between">
+                <div className="flex-1 flex justify-between sm:hidden">
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={!paginatedResult.hasPreviousPage}
+                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={!paginatedResult.hasNextPage}
+                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm text-gray-700">
+                      Showing{' '}
+                      <span className="font-medium">{((currentPage - 1) * itemsPerPage) + 1}</span>
+                      {' '}to{' '}
+                      <span className="font-medium">
+                        {Math.min(currentPage * itemsPerPage, totalCount)}
+                      </span>
+                      {' '}of{' '}
+                      <span className="font-medium">{totalCount}</span>
+                      {' '}results
+                    </p>
+                  </div>
+                  <div>
+                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                      <button
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={!paginatedResult.hasPreviousPage}
+                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <span className="sr-only">Previous</span>
+                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                      
+                      {/* Page numbers */}
+                      {Array.from({ length: Math.min(5, paginatedResult.totalPages) }, (_, i) => {
+                        let pageNumber;
+                        if (paginatedResult.totalPages <= 5) {
+                          pageNumber = i + 1;
+                        } else if (currentPage <= 3) {
+                          pageNumber = i + 1;
+                        } else if (currentPage >= paginatedResult.totalPages - 2) {
+                          pageNumber = paginatedResult.totalPages - 4 + i;
+                        } else {
+                          pageNumber = currentPage - 2 + i;
+                        }
+
+                        return (
+                          <button
+                            key={pageNumber}
+                            onClick={() => handlePageChange(pageNumber)}
+                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                              pageNumber === currentPage
+                                ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                                : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                            }`}
+                          >
+                            {pageNumber}
+                          </button>
+                        );
+                      })}
+
+                      <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={!paginatedResult.hasNextPage}
+                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <span className="sr-only">Next</span>
+                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

@@ -18,6 +18,10 @@ import type {
   UpdateEventRequest,
 } from "../contracts/request/EventRequests";
 
+import type {
+  GetEventsExtendedRequest,
+} from "../contracts/request/GetEventsExtendedRequest";
+
 // Response interfaces
 import type {
   LoginResponse,
@@ -39,6 +43,10 @@ import type {
   GetEventResponse,
   GetAllEventsResponse,
 } from "../contracts/response/EventResponses";
+
+import type {
+  GetEventsExtendedResponse,
+} from "../contracts/response/GetEventsExtendedResponse";
 
 import type {
   GetEventTypesResponse,
@@ -248,6 +256,13 @@ export class ApiService {
 
   async getAllEvents(): Promise<GetAllEventsResponse> {
     return this.request<GetAllEventsResponse>("/api/events/");
+  }
+
+  async getEventsExtended(request: GetEventsExtendedRequest): Promise<GetEventsExtendedResponse> {
+    return this.request<GetEventsExtendedResponse>("/api/events/GetSorted", {
+      method: "POST",
+      body: JSON.stringify(request),
+    });
   }
 
   async getEventTypes(): Promise<GetEventTypesResponse> {
