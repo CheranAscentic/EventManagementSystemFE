@@ -6,11 +6,13 @@ import { OwnerEventsPage } from './components/OwnerEventsPage'
 import { EventDashboard } from './components/EventDashboard'
 import { apiService } from './api'
 import type { AppUser } from './models'
+import { EventsCalendar } from './components/EventsCalendar'
 
 function App() {
   // Authentication state management
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [currentUser, setCurrentUser] = useState<AppUser | null>(null)
+  // const navigate = useNavigate()
 
   // Check for existing authentication on app load
   useEffect(() => {
@@ -93,6 +95,8 @@ function App() {
     
     // Clear token from API service
     apiService.clearAuthToken();
+
+    // navigate('/login'); // Redirect to login page after logout
     
     console.log('User logged out and storage cleared');
   };
@@ -108,6 +112,9 @@ function App() {
         />
         
         <Routes>
+          {/* Route for Events Calendar */}
+          <Route path="/events/calendar" element={<EventsCalendar />} />
+
           <Route path="/" element={<HomePage />} />
           <Route 
             path="/login" 

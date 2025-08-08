@@ -11,4 +11,5 @@ export interface Event {
   registrationCutoffDate: string;
   noOfRegistrations: number;
   imageUrl?: string | null;
+  registeredIds?: string[]; // List of user IDs who have registered for the event
 }

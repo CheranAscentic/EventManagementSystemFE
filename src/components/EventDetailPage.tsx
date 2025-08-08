@@ -22,6 +22,7 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
     phone: ''
   });
   const navigate = useNavigate();
+  const [userIsRegistered, setUserIsRegistered] = useState(false);
 
   useEffect(() => {
     if (eventId) {
@@ -63,6 +64,15 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
 
       if (foundEvent) {
         setEvent(foundEvent);
+
+        if (currentUser) {
+            // Check if current user is registered for this event
+            const isRegistered = foundEvent.registeredIds?.includes(currentUser.userId) || false;
+            console.log('Did not find ', currentUser.userId, ' in ', foundEvent.registeredIds);
+            console.log('User registration status:', isRegistered);
+            setUserIsRegistered(isRegistered);
+        }
+
       } else {
         setError('Event not found');
       }
@@ -392,7 +402,7 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
               {!showRegistrationForm ? (
                 <button
                   onClick={handleRegisterClick}
-                  disabled={!registrationStatus.canRegister || !currentUser}
+                  disabled={!registrationStatus.canRegister || !currentUser || userIsRegistered}
                   className={`w-full py-3 px-4 rounded-md font-medium transition-colors ${
                     registrationStatus.canRegister && currentUser
                       ? 'bg-blue-600 hover:bg-blue-700 text-white'
@@ -403,8 +413,10 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
                     ? 'Log In to Register'
                     : !registrationStatus.canRegister
                     ? registrationStatus.text
+                    : userIsRegistered
+                    ? 'User Already Registered'
                     : 'Register for Event'
-                  }
+                }
                 </button>
               ) : (
                 /* Registration Form */
