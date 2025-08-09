@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
+import interactionPlugin from '@fullcalendar/interaction';
 import { apiService } from '../api';
 import { ApiResponseHandler, ApiError } from '../types';
 import type { Event } from '../models';
@@ -15,6 +18,8 @@ export function EventsCalendar() {
   const [selectedType, setSelectedType] = useState('');
   const [eventTypes, setEventTypes] = useState<string[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentView, setCurrentView] = useState<'calendar' | 'dayView'>('calendar');
+  const [selectedDayDate, setSelectedDayDate] = useState<Date | null>(null);
 //   const [isCalendarInitialized, setIsCalendarInitialized] = useState(false);
   const navigate = useNavigate();
 
@@ -129,7 +134,7 @@ export function EventsCalendar() {
   const calendarEvents = events.map(event => ({
     id: event.id,
     title: event.title,
-    date: event.eventDate.split('T')[0], // Extract date part only
+    start: event.eventDate, // Use full datetime for proper week view positioning
     backgroundColor: eventUtils.canRegister(event) ? '#10b981' : '#ef4444', // Green if available, red if not
     borderColor: eventUtils.canRegister(event) ? '#059669' : '#dc2626',
     textColor: 'white',
@@ -147,6 +152,18 @@ export function EventsCalendar() {
   const handleEventClick = (clickInfo: { event: { id: string } }) => {
     const eventId = clickInfo.event.id;
     navigate(`/event/${eventId}`);
+  };
+
+  // Handle date click for day view
+  const handleDateClick = (dateClickInfo: { date: Date }) => {
+    setSelectedDayDate(new Date(dateClickInfo.date));
+    setCurrentView('dayView');
+  };
+
+  // Handle back to month view
+  const handleBackToMonth = () => {
+    setCurrentView('calendar');
+    setSelectedDayDate(null);
   };
 
   // Handle date navigation - this is the key fix
@@ -195,15 +212,135 @@ export function EventsCalendar() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Events Calendar</h1>
-          <p className="text-gray-600">
-            View events in calendar format and click on any event to see details
-          </p>
-        </div>
+        {/* Custom Day View */}
+        {currentView === 'dayView' && selectedDayDate && (
+          <div>
+            {/* Day View Header */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                    Day View - {selectedDayDate.toLocaleDateString('en-US', { 
+                      weekday: 'long', 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </h1>
+                  <p className="text-gray-600">
+                    Events for the selected day. Click on any event to see details.
+                  </p>
+                </div>
+                <button
+                  onClick={handleBackToMonth}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                >
+                  ← Back to Calendar
+                </button>
+              </div>
+            </div>
 
-        {/* Main Content - Split Layout */}
+            {/* Day Events */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Events Today</h2>
+              
+              {loading ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                </div>
+              ) : error ? (
+                <div className="text-red-600 text-center py-8">
+                  <p>{error}</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {events
+                    .filter((event: Event) => {
+                      // Filter by search term
+                      const matchesSearch = !searchTerm || 
+                        event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        event.description.toLowerCase().includes(searchTerm.toLowerCase());
+                      
+                      // Filter by event type
+                      const matchesType = !selectedType || event.type === selectedType;
+                      
+                      // Filter by selected day
+                      const eventDate = new Date(event.eventDate);
+                      const selectedDate = selectedDayDate;
+                      const matchesDate = eventDate.getDate() === selectedDate.getDate() &&
+                                         eventDate.getMonth() === selectedDate.getMonth() &&
+                                         eventDate.getFullYear() === selectedDate.getFullYear();
+                      
+                      return matchesSearch && matchesType && matchesDate;
+                    })
+                    .map((event: Event) => (
+                      <div 
+                        key={event.id}
+                        className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                        onClick={() => handleEventClick({ event: { id: event.id } })}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h3 className="font-medium text-gray-900 mb-1">{event.title}</h3>
+                            <p className="text-sm text-gray-600 mb-2">{event.description}</p>
+                            <div className="text-sm text-gray-500">
+                              <p>
+                                {new Date(event.eventDate).toLocaleString('en-US', {
+                                  hour: 'numeric',
+                                  minute: '2-digit',
+                                  hour12: true
+                                })}
+                              </p>
+                              <p>{event.location}</p>
+                              <p>Max Attendees: {event.capacity}</p>
+                            </div>
+                          </div>
+                          <div className="ml-4">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                              {event.type}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  
+                  {events.filter((event: Event) => {
+                    const matchesSearch = !searchTerm || 
+                      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      event.description.toLowerCase().includes(searchTerm.toLowerCase());
+                    
+                    const matchesType = !selectedType || event.type === selectedType;
+                    
+                    const eventDate = new Date(event.eventDate);
+                    const selectedDate = selectedDayDate;
+                    const matchesDate = eventDate.getDate() === selectedDate.getDate() &&
+                                       eventDate.getMonth() === selectedDate.getMonth() &&
+                                       eventDate.getFullYear() === selectedDate.getFullYear();
+                    
+                    return matchesSearch && matchesType && matchesDate;
+                  }).length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>No events scheduled for this day.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Regular Calendar View */}
+        {currentView === 'calendar' && (
+          <>
+            {/* Header */}
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Events Calendar</h1>
+              <p className="text-gray-600">
+                View events in month, week, or day format. Click on any event to see details or click on dates to navigate.
+              </p>
+            </div>
+
+            {/* Main Content - Split Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main Calendar Area - Left Side (3/4 width) */}
           <div className="lg:col-span-3">
@@ -309,13 +446,20 @@ export function EventsCalendar() {
             {/* Calendar */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <FullCalendar
-                plugins={[dayGridPlugin]}
+                plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
                 initialView="dayGridMonth"
+                // initialDate={new Date(1997, 8, 3)}
+                views={{
+                  dayGridMonth: { buttonText: 'Month' },
+                  timeGridWeek: { buttonText: 'Week' },
+                  listDay: { buttonText: 'Day' }
+                }}
                 headerToolbar={{
                   left: 'prev,next today',
                   center: 'title',
-                  right: 'dayGridMonth'
+                  right: 'dayGridMonth,timeGridWeek,listDay'
                 }}
+                dateClick={handleDateClick}
                 events={calendarEvents}
                 eventClick={handleEventClick}
                 datesSet={handleDatesSet}
@@ -329,6 +473,9 @@ export function EventsCalendar() {
                   omitZeroMinute: true,
                   meridiem: 'short'
                 }}
+                slotMinTime="06:00:00"
+                slotMaxTime="22:00:00"
+                allDaySlot={true}
                 eventDidMount={(info) => {
                   // Add tooltip with event details
                   const event = info.event;
@@ -465,6 +612,8 @@ export function EventsCalendar() {
             </div>
           </div>
         </div>
+          </>
+        )}
       </div>
     </div>
   );
