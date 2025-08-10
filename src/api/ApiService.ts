@@ -10,7 +10,6 @@ import type {
 import type {
   RegisterForEventRequest,
   CancelEventRegistrationRequest,
-  UploadEventImageRequest,
 } from "../contracts/request/EventRegistrationRequests";
 
 import type {
@@ -222,11 +221,48 @@ export class ApiService {
     );
   }
 
-  async uploadEventImage(request: UploadEventImageRequest): Promise<UploadEventImageResponse> {
-    return this.request<UploadEventImageResponse>("/api/event-registrations/event-image", {
+  async uploadEventImage(eventId: string, imageFile: File): Promise<UploadEventImageResponse> {
+    const url = `${this.baseUrl}/api/events/event-image`;
+    
+    // Create FormData for multipart/form-data upload
+    const formData = new FormData();
+    formData.append('eventId', eventId);
+    formData.append('imageFile', imageFile);
+
+    const headers: Record<string, string> = {};
+
+    if (this.authToken) {
+      headers.Authorization = `Bearer ${this.authToken}`;
+    }
+
+    // Note: Don't set Content-Type header - let browser set it automatically for FormData
+    const config: RequestInit = {
       method: "POST",
-      body: JSON.stringify(request),
-    });
+      headers,
+      body: formData,
+    };
+
+    console.log(`Making image upload request to ${url} with file:`, imageFile.name);
+
+    try {
+      const response = await fetch(url, config);
+      console.log(`Image upload response from ${url}:`, response);
+      
+      // Always parse JSON first
+      const data = await response.json();
+      console.log('Parsed image upload response data:', data);
+      
+      if (!response.ok) {
+        // Handle error responses with your backend structure
+        const errorMessage = data?.error || data?.message || `HTTP error! status: ${response.status}`;
+        throw new Error(errorMessage);
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Image upload request failed:", error);
+      throw error;
+    }
   }
 
   // Event Methods

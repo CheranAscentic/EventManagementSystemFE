@@ -33,6 +33,7 @@ export function EditEventPage() {
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imageUploading, setImageUploading] = useState(false);
   const [imageUploadError, setImageUploadError] = useState('');
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (eventId) {
@@ -232,22 +233,35 @@ export function EditEventPage() {
     }
   };
 
-  const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setImageUrl(e.target.value);
-    setImageUploadError('');
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setImageUploadError('Please select a valid image file (JPG, PNG, GIF, or WebP)');
+        return;
+      }
+      
+      // Validate file size (10MB limit)
+      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+      if (file.size > maxSize) {
+        setImageUploadError('Image file size cannot exceed 10MB');
+        return;
+      }
+      
+      setSelectedImageFile(file);
+      setImageUploadError('');
+      
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setImageUrl(previewUrl);
+    }
   };
 
   const handleImageUpload = async () => {
-    if (!imageUrl.trim() || !eventId) {
-      setImageUploadError('Please enter a valid image URL');
-      return;
-    }
-
-    // Basic URL validation
-    try {
-      new URL(imageUrl);
-    } catch {
-      setImageUploadError('Please enter a valid URL');
+    if (!selectedImageFile || !eventId) {
+      setImageUploadError('Please select an image file');
       return;
     }
 
@@ -255,20 +269,33 @@ export function EditEventPage() {
     setImageUploadError('');
 
     try {
-      console.log('Uploading event image:', imageUrl);
+      console.log('Uploading event image file:', selectedImageFile.name);
       
-      const response = await apiService.uploadEventImage({
-        eventId: eventId,
-        imageUrl: imageUrl.trim()
-      });
-      
+      const response = await apiService.uploadEventImage(eventId, selectedImageFile);
       const result = ApiResponseHandler.handleResponse(response);
+      
       console.log('Image uploaded successfully:', result);
       
-      // Reload event data to get updated imageUrl
-      await loadEventData(eventId);
+      // Update the image URL with the server response
+      if (result?.imageUrl) {
+        setImageUrl(result.imageUrl);
+        
+        // Clean up the preview URL
+        if (imageUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(imageUrl);
+        }
+        
+        // Reload event data to get updated imageUrl
+        await loadEventData(eventId);
+        
+        alert('Event image uploaded successfully!');
+      }
       
-      alert('Event image updated successfully!');
+      // Reset file input
+      setSelectedImageFile(null);
+      const fileInput = document.getElementById('imageFile') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+      
     } catch (error) {
       console.error('Error uploading image:', error);
       
@@ -280,6 +307,23 @@ export function EditEventPage() {
     } finally {
       setImageUploading(false);
     }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImageFile(null);
+    setImageUploadError('');
+    
+    // Clean up preview URL if it exists
+    if (imageUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(imageUrl);
+    }
+    
+    // Reset to original image URL or empty
+    setImageUrl(originalEvent?.imageUrl || '');
+    
+    // Reset file input
+    const fileInput = document.getElementById('imageFile') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
   };
 
   // Generate date input min values
@@ -599,10 +643,12 @@ export function EditEventPage() {
                 {/* Current Image Preview */}
                 {(originalEvent?.imageUrl || imageUrl) && (
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Current Image</label>
-                    <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {selectedImageFile ? 'Preview' : 'Current Image'}
+                    </label>
+                    <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
                       <img
-                        src={originalEvent?.imageUrl || imageUrl}
+                        src={imageUrl || originalEvent?.imageUrl || ''}
                         alt="Event preview"
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -614,54 +660,88 @@ export function EditEventPage() {
                           }
                         }}
                       />
+                      {selectedImageFile && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                          title="Remove selected image"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}
                 
                 <div className="space-y-4">
+                  {/* File Input */}
                   <div>
-                    <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">
-                      Image URL
+                    <label htmlFor="imageFile" className="block text-sm font-medium text-gray-700">
+                      Select Image File
                     </label>
                     <input
-                      type="url"
-                      id="imageUrl"
-                      value={imageUrl}
-                      onChange={handleImageUrlChange}
-                      placeholder="https://example.com/image.jpg"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      type="file"
+                      id="imageFile"
+                      accept=".jpg,.jpeg,.png,.gif,.webp"
+                      onChange={handleImageFileChange}
+                      className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      disabled={imageUploading}
                     />
                     <p className="mt-1 text-xs text-gray-500">
-                      Enter a URL to an image that will be displayed for this event
+                      Supported formats: JPG, PNG, GIF, WebP. Maximum size: 10MB
                     </p>
+                    {selectedImageFile && (
+                      <p className="mt-1 text-xs text-green-600">
+                        Selected: {selectedImageFile.name} ({(selectedImageFile.size / 1024 / 1024).toFixed(2)} MB)
+                      </p>
+                    )}
                   </div>
                   
                   {imageUploadError && (
-                    <div className="text-sm text-red-600">
+                    <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
                       {imageUploadError}
                     </div>
                   )}
                   
-                  <button
-                    type="button"
-                    onClick={handleImageUpload}
-                    disabled={imageUploading || !imageUrl.trim()}
-                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {imageUploading ? (
-                      <>
-                        <div className="animate-spin h-3 w-3 border border-gray-400 border-t-transparent rounded-full mr-2"></div>
-                        Updating Image...
-                      </>
-                    ) : (
-                      <>
+                  {/* Upload Button */}
+                  <div className="flex space-x-3">
+                    <button
+                      type="button"
+                      onClick={handleImageUpload}
+                      disabled={imageUploading || !selectedImageFile}
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {imageUploading ? (
+                        <>
+                          <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                          </svg>
+                          Upload Image
+                        </>
+                      )}
+                    </button>
+                    
+                    {(selectedImageFile || imageUrl) && !imageUploading && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
                         <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Update Image
-                      </>
+                        Remove
+                      </button>
                     )}
-                  </button>
+                  </div>
                 </div>
               </div>
 
