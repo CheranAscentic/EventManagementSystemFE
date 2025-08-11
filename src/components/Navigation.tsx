@@ -37,7 +37,7 @@ export function Navigation({
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <Link to="/" className="text-xl font-bold text-gray-800 hover:text-gray-600 transition-colors">
-                CalVent
+                CalVender
               </Link>
             </div>
           </div>

@@ -1,5 +1,7 @@
 // API Service for Event Management System
 
+import { envConfig } from '../utils/envConfig';
+
 // Request interfaces
 import type {
   LoginRequest,
@@ -60,12 +62,18 @@ import type {
 export class ApiService {
   private baseUrl: string;
   private authToken?: string;
+  private debugMode: boolean;
+  private tokenStorageKey: string;
+  private fallbackTokenKey: string;
 
-  constructor(baseUrl: string = "https://localhost:7049") {
-    this.baseUrl = baseUrl;
+  constructor(baseUrl?: string) {
+    this.baseUrl = baseUrl || envConfig.apiBaseUrl;
+    this.debugMode = envConfig.debugApi;
+    this.tokenStorageKey = envConfig.tokenStorageKey;
+    this.fallbackTokenKey = envConfig.fallbackTokenKey;
     
     // Load existing token from AppUser storage if available
-    const storedUserData = localStorage.getItem('AppUser');
+    const storedUserData = localStorage.getItem(this.tokenStorageKey);
     if (storedUserData) {
       try {
         const appUser = JSON.parse(storedUserData);
@@ -76,22 +84,30 @@ export class ApiService {
           
           if (expirationDate > currentDate) {
             this.authToken = appUser.token;
+            this.log('Token loaded successfully from storage');
           } else {
             // Token expired, clean up
-            localStorage.removeItem('AppUser');
-            console.log('Token expired during ApiService initialization');
+            localStorage.removeItem(this.tokenStorageKey);
+            this.log('Token expired during ApiService initialization');
           }
         }
       } catch (error) {
-        console.error('Error parsing stored user data in ApiService:', error);
-        localStorage.removeItem('AppUser');
+        this.log('Error parsing stored user data in ApiService:', error);
+        localStorage.removeItem(this.tokenStorageKey);
       }
     } else {
       // Fallback: check for old token-only storage
-      this.authToken = localStorage.getItem('authToken') || undefined;
+      this.authToken = localStorage.getItem(this.fallbackTokenKey) || undefined;
       if (this.authToken) {
-        console.log('Found old token storage, consider migrating to AppUser storage');
+        this.log('Found old token storage, consider migrating to AppUser storage');
       }
+    }
+  }
+
+  // Logging helper that respects debug mode
+  private log(message: string, ...args: unknown[]) {
+    if (this.debugMode) {
+      console.log(`[ApiService] ${message}`, ...args);
     }
   }
 
@@ -104,22 +120,25 @@ export class ApiService {
     // from the App component's authentication handlers
     if (token) {
       // Only store token if no AppUser is already stored
-      const storedUserData = localStorage.getItem('AppUser');
+      const storedUserData = localStorage.getItem(this.tokenStorageKey);
       if (!storedUserData) {
-        localStorage.setItem('authToken', token);
+        localStorage.setItem(this.fallbackTokenKey, token);
+        this.log('Token stored using fallback method');
       }
     } else {
       // Clear all authentication data
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('AppUser');
+      localStorage.removeItem(this.fallbackTokenKey);
+      localStorage.removeItem(this.tokenStorageKey);
+      this.log('Authentication tokens cleared');
     }
   }
 
   // Clear authentication token
   clearAuthToken() {
     this.authToken = undefined;
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('AppUser');
+    localStorage.removeItem(this.fallbackTokenKey);
+    localStorage.removeItem(this.tokenStorageKey);
+    this.log('Authentication cleared');
   }
 
   // Generic HTTP request method
@@ -128,6 +147,7 @@ export class ApiService {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
+    const timeout = envConfig.apiTimeout;
     
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -143,15 +163,25 @@ export class ApiService {
       headers,
     };
 
-    console.log(`Making request to ${url} with options:`, config);
+    this.log(`Making request to ${url}`, { method: config.method || 'GET', hasAuth: !!this.authToken });
 
     try {
-      const response = await fetch(url, config);
-      console.log(`Response from ${url}:`, response);
+      // Create timeout promise
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error(`Request timeout after ${timeout}ms`)), timeout);
+      });
+
+      // Race between fetch and timeout
+      const response = await Promise.race([
+        fetch(url, config),
+        timeoutPromise
+      ]);
+
+      this.log(`Response from ${url}:`, { status: response.status, ok: response.ok });
       
       // Always parse JSON first
       const data = await response.json();
-      console.log('Parsed response data:', data);
+      this.log('Parsed response data:', data);
       
       if (!response.ok) {
         // Handle error responses with your backend structure
@@ -161,7 +191,7 @@ export class ApiService {
 
       return data;
     } catch (error) {
-      console.error("API request failed:", error);
+      this.log("API request failed:", error);
       throw error;
     }
   }
@@ -223,6 +253,7 @@ export class ApiService {
 
   async uploadEventImage(eventId: string, imageFile: File): Promise<UploadEventImageResponse> {
     const url = `${this.baseUrl}/api/events/event-image`;
+    const timeout = envConfig.apiTimeout;
     
     // Create FormData for multipart/form-data upload
     const formData = new FormData();
@@ -242,15 +273,29 @@ export class ApiService {
       body: formData,
     };
 
-    console.log(`Making image upload request to ${url} with file:`, imageFile.name);
+    this.log(`Making image upload request to ${url}`, { 
+      fileName: imageFile.name, 
+      fileSize: imageFile.size,
+      eventId 
+    });
 
     try {
-      const response = await fetch(url, config);
-      console.log(`Image upload response from ${url}:`, response);
+      // Create timeout promise
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error(`Upload timeout after ${timeout}ms`)), timeout);
+      });
+
+      // Race between fetch and timeout
+      const response = await Promise.race([
+        fetch(url, config),
+        timeoutPromise
+      ]);
+
+      this.log(`Image upload response from ${url}:`, { status: response.status, ok: response.ok });
       
       // Always parse JSON first
       const data = await response.json();
-      console.log('Parsed image upload response data:', data);
+      this.log('Parsed image upload response data:', data);
       
       if (!response.ok) {
         // Handle error responses with your backend structure
@@ -260,7 +305,7 @@ export class ApiService {
 
       return data;
     } catch (error) {
-      console.error("Image upload request failed:", error);
+      this.log("Image upload request failed:", error);
       throw error;
     }
   }
