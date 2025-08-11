@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { apiService } from '../api';
 import { ApiResponseHandler, ApiError } from '../types';
 import type { Event, AppUser } from '../models';
@@ -11,6 +11,7 @@ interface EventDetailPageProps {
 
 export function EventDetailPage({ currentUser }: EventDetailPageProps) {
   const { eventId } = useParams<{ eventId: string }>();
+  const [searchParams] = useSearchParams();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -24,27 +25,18 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
   const navigate = useNavigate();
   const [userIsRegistered, setUserIsRegistered] = useState(false);
 
-  useEffect(() => {
-    if (eventId) {
-      loadEvent(eventId);
+  // Get the source parameter to determine where to navigate back to
+  const source = searchParams.get('source');
+
+  const handleBackNavigation = () => {
+    if (source === 'calendar') {
+      navigate('/events/calendar');
     } else {
-      setError('Event ID not provided');
-      setLoading(false);
+      navigate('/events'); // Default to events list
     }
-  }, [eventId]);
+  };
 
-  // Prefill registration form with user data when currentUser changes
-  useEffect(() => {
-    if (currentUser) {
-      setRegistrationData({
-        name: `${currentUser.firstName} ${currentUser.lastName}`.trim() || currentUser.userName,
-        email: currentUser.email || '',
-        phone: currentUser.phoneNumber || ''
-      });
-    }
-  }, [currentUser]);
-
-  const loadEvent = async (id: string) => {
+  const loadEvent = useCallback(async (id: string) => {
     try {
       setLoading(true);
       setError('');
@@ -86,7 +78,27 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (eventId) {
+      loadEvent(eventId);
+    } else {
+      setError('Event ID not provided');
+      setLoading(false);
+    }
+  }, [eventId, loadEvent]);
+
+  // Prefill registration form with user data when currentUser changes
+  useEffect(() => {
+    if (currentUser) {
+      setRegistrationData({
+        name: `${currentUser.firstName} ${currentUser.lastName}`.trim() || currentUser.userName,
+        email: currentUser.email || '',
+        phone: currentUser.phoneNumber || ''
+      });
+    }
+  }, [currentUser]);
 
   const formatRegistrationCutoff = (dateString: string) => {
     const cutoffDate = dateUtils.safeParseDate(dateString);
@@ -208,10 +220,10 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
           <p className="mt-2 text-gray-600">{error}</p>
           <div className="mt-6 space-x-4">
             <button
-              onClick={() => navigate('/events')}
+              onClick={handleBackNavigation}
               className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
             >
-              Back to Events
+              {source === 'calendar' ? 'Back to Calendar' : 'Back to Events'}
             </button>
             {eventId && (
               <button
@@ -233,10 +245,10 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
         <div className="text-center">
           <p className="text-gray-600">Event not found</p>
           <button
-            onClick={() => navigate('/events')}
+            onClick={handleBackNavigation}
             className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
           >
-            Back to Events
+            {source === 'calendar' ? 'Back to Calendar' : 'Back to Events'}
           </button>
         </div>
       </div>
@@ -270,13 +282,13 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
         {/* Breadcrumb and Back Button */}
         <div className="absolute top-4 left-4">
           <button
-            onClick={() => navigate('/events')}
+            onClick={handleBackNavigation}
             className="flex items-center text-white hover:text-gray-200 transition-colors"
           >
             <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Events
+            {source === 'calendar' ? 'Back to Calendar' : 'Back to Events'}
           </button>
         </div>
 

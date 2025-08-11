@@ -28,6 +28,8 @@ export function CreateEventPage() {
   // Image upload state
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imageUploadError, setImageUploadError] = useState('');
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imageUploading, setImageUploading] = useState(false);
 
   useEffect(() => {
     loadEventTypes();
@@ -132,7 +134,7 @@ export function CreateEventPage() {
       console.log('Event created successfully:', createdEvent);
       
       // Upload image if provided
-      if (imageUrl.trim()) {
+      if (selectedImageFile) {
         await handleImageUpload(createdEvent.id);
       }
       
@@ -163,35 +165,46 @@ export function CreateEventPage() {
     navigate('/admin/my-events');
   };
 
-  const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setImageUrl(e.target.value);
-    setImageUploadError('');
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setImageUploadError('Please select a valid image file (JPG, PNG, GIF, or WebP)');
+        return;
+      }
+      
+      // Validate file size (10MB limit)
+      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+      if (file.size > maxSize) {
+        setImageUploadError('Image file size cannot exceed 10MB');
+        return;
+      }
+      
+      setSelectedImageFile(file);
+      setImageUploadError('');
+      
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setImageUrl(previewUrl);
+    }
   };
 
   const handleImageUpload = async (eventId: string) => {
-    if (!imageUrl.trim()) {
-      return; // No image URL provided, skip upload
+    if (!selectedImageFile) {
+      return; // No image file provided, skip upload
     }
 
-    // Basic URL validation
-    try {
-      new URL(imageUrl);
-    } catch {
-      setImageUploadError('Please enter a valid URL');
-      return;
-    }
-
+    setImageUploading(true);
     setImageUploadError('');
 
     try {
-      console.log('Uploading event image:', imageUrl);
+      console.log('Uploading event image file:', selectedImageFile.name);
       
-      const response = await apiService.uploadEventImage({
-        eventId: eventId,
-        imageUrl: imageUrl.trim()
-      });
-      
+      const response = await apiService.uploadEventImage(eventId, selectedImageFile);
       const result = ApiResponseHandler.handleResponse(response);
+      
       console.log('Image uploaded successfully:', result);
       
     } catch (error) {
@@ -203,7 +216,25 @@ export function CreateEventPage() {
         console.error('Failed to upload image. Please try again.');
       }
       // Don't show error to user since they're being redirected anyway
+    } finally {
+      setImageUploading(false);
     }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImageFile(null);
+    setImageUploadError('');
+    
+    // Clean up preview URL if it exists
+    if (imageUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(imageUrl);
+    }
+    
+    setImageUrl('');
+    
+    // Reset file input
+    const fileInput = document.getElementById('imageFile') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
   };
 
   // Generate date input min values
@@ -447,8 +478,10 @@ export function CreateEventPage() {
                 {/* Image Preview */}
                 {imageUrl && (
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Image Preview</label>
-                    <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {selectedImageFile ? 'Preview' : 'Image Preview'}
+                    </label>
+                    <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
                       <img
                         src={imageUrl}
                         alt="Event preview"
@@ -462,32 +495,64 @@ export function CreateEventPage() {
                           }
                         }}
                       />
+                      {selectedImageFile && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                          title="Remove selected image"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}
                 
                 <div className="space-y-4">
+                  {/* File Input */}
                   <div>
-                    <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">
-                      Image URL
+                    <label htmlFor="imageFile" className="block text-sm font-medium text-gray-700">
+                      Select Image File
                     </label>
                     <input
-                      type="url"
-                      id="imageUrl"
-                      value={imageUrl}
-                      onChange={handleImageUrlChange}
-                      placeholder="https://example.com/image.jpg"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      type="file"
+                      id="imageFile"
+                      accept=".jpg,.jpeg,.png,.gif,.webp"
+                      onChange={handleImageFileChange}
+                      className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      disabled={loading}
                     />
                     <p className="mt-1 text-xs text-gray-500">
-                      Enter a URL to an image that will be displayed for this event (will be uploaded after creating the event)
+                      Supported formats: JPG, PNG, GIF, WebP. Maximum size: 10MB. Image will be uploaded after event creation.
                     </p>
+                    {selectedImageFile && (
+                      <p className="mt-1 text-xs text-green-600">
+                        Selected: {selectedImageFile.name} ({(selectedImageFile.size / 1024 / 1024).toFixed(2)} MB)
+                      </p>
+                    )}
                   </div>
                   
                   {imageUploadError && (
-                    <div className="text-sm text-red-600">
+                    <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
                       {imageUploadError}
                     </div>
+                  )}
+                  
+                  {/* Remove Button */}
+                  {selectedImageFile && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Remove Image
+                    </button>
                   )}
                 </div>
               </div>
@@ -504,13 +569,13 @@ export function CreateEventPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || imageUploading}
                   className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                 >
                   {loading ? (
                     <>
                       <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
-                      Creating...
+                      {imageUploading ? 'Uploading Image...' : 'Creating Event...'}
                     </>
                   ) : (
                     'Create Event'

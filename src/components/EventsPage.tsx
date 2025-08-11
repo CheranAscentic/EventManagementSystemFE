@@ -76,7 +76,7 @@ export function EventsPage() {
   }, [loadEvents]);
 
   const handleEventClick = (eventId: string) => {
-    navigate(`/event/${eventId}`);
+    navigate(`/event/${eventId}?source=events`);
   };
 
   const clearFilters = () => {

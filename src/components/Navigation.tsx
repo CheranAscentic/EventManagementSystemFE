@@ -37,7 +37,7 @@ export function Navigation({
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <Link to="/" className="text-xl font-bold text-gray-800 hover:text-gray-600 transition-colors">
-                Event Manager
+                CalVent
               </Link>
             </div>
           </div>
@@ -52,19 +52,19 @@ export function Navigation({
               Events Calendar
             </Link>
             {/* Navigation Links */}
-            <Link
+            {/* <Link
               to="/events"
               className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
               Events
-            </Link>
+            </Link> */}
             
             {isLoggedIn && (
               <Link
                 to="/my-registrations"
                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
-                My Registrations
+                My Event Registrations
               </Link>
             )}
 
@@ -76,12 +76,12 @@ export function Navigation({
                 >
                   My Events
                 </Link>
-                <Link
+                {/* <Link
                   to="/dashboard"
                   className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   Dashboard
-                </Link>
+                </Link> */}
               </>
             )}
 

@@ -4,10 +4,10 @@ export function HomePage() {
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Welcome to Event Management System
+            Welcome to CalVent
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Discover and register for amazing events in your area
+            Your Calendar Events Management System - Discover and register for amazing events in your area
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">

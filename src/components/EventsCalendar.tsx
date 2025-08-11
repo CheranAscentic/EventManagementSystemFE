@@ -151,7 +151,7 @@ export function EventsCalendar() {
   // Handle event click
   const handleEventClick = (clickInfo: { event: { id: string } }) => {
     const eventId = clickInfo.event.id;
-    navigate(`/event/${eventId}`);
+    navigate(`/event/${eventId}?source=calendar`);
   };
 
   // Handle date click for day view
