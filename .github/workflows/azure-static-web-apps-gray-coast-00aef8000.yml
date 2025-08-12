@@ -31,13 +31,11 @@ jobs:
       # Install dependencies
       - name: Install dependencies
         run: |
-          cd EventManagementSystem
           npm ci
       
       # Build the application
       - name: Build application
         run: |
-          cd EventManagementSystem
           npm run build
       
       - name: Build And Deploy
@@ -48,7 +46,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           ###### Repository/Build Configurations ######
-          app_location: "/EventManagementSystem" # Changed to correct path
+          app_location: "/" # Changed to correct path
           api_location: ""
           output_location: "dist"
           skip_app_build: true  # We're building manually above
@@ -65,3 +63,4 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GRAY_COAST_00AEF8000 }}
           action: "close"
+
