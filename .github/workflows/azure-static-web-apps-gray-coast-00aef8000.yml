@@ -3,11 +3,11 @@ name: Azure Static Web Apps CI/CD
 on:
   push:
     branches:
-      - deployment  # Keeping deployment branch
+      - deployment
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
-      - deployment  # Keeping deployment branch
+      - deployment
 
 jobs:
   build_and_deploy_job:
@@ -20,23 +20,27 @@ jobs:
           submodules: true
           lfs: false
       
-      # Add Node.js setup
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
+          cache-dependency-path: 'package-lock.json'  # Updated path
       
-      # Install dependencies
       - name: Install dependencies
-        run: |
-          npm ci
+        run: npm ci  # No need to cd since we're in root
       
-      # Build the application
       - name: Build application
+        run: npm run build  # No need to cd since we're in root
+      
+      # Copy config file to build output
+      - name: Copy staticwebapp.config.json
         run: |
-          npm run build
+          if [ -f public/staticwebapp.config.json ]; then
+            cp public/staticwebapp.config.json dist/
+          elif [ -f staticwebapp.config.json ]; then
+            cp staticwebapp.config.json dist/
+          fi
       
       - name: Build And Deploy
         id: builddeploy
@@ -45,12 +49,10 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GRAY_COAST_00AEF8000 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          ###### Repository/Build Configurations ######
-          app_location: "/" # Changed to correct path
+          app_location: "/"  # Updated to root
           api_location: ""
           output_location: "dist"
-          skip_app_build: true  # We're building manually above
-          ###### End of Repository/Build Configurations ######
+          skip_app_build: true
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
