@@ -107,7 +107,7 @@ function App() {
         <Navigation
           isLoggedIn={isLoggedIn}
           userRole={currentUser?.userRole}
-          userName={currentUser ? `${currentUser.firstName} ${currentUser.lastName}`.trim() || currentUser.userName : ''}
+          userName={currentUser ? currentUser.userName || `${currentUser.firstName} ${currentUser.lastName}`.trim() : ''}
           onLogout={handleLogout}
         />
         

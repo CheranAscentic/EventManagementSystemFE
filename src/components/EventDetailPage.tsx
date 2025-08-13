@@ -1,3 +1,4 @@
+import { AlertTriangle } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { apiService } from '../api';
@@ -213,9 +214,7 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center max-w-md mx-auto">
-          <svg className="mx-auto h-12 w-12 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 14.5c-.77.833.192 2.5 1.732 2.5z" />
-          </svg>
+          <AlertTriangle className="mx-auto h-12 w-12 text-destructive" />
           <h2 className="mt-4 text-xl font-semibold text-foreground">Error</h2>
           <p className="mt-2 text-muted-foreground">{error}</p>
           <div className="mt-6 space-x-4">

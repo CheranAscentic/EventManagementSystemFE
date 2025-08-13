@@ -1,3 +1,4 @@
+import { AlertTriangle , ChevronRight, CloudUpload, Trash2 } from 'lucide-react';
 // Edit Event Page component for Admin users to edit existing events
 
 import { useState, useEffect } from 'react';
@@ -354,9 +355,7 @@ export function EditEventPage() {
         <div className="bg-destructive/10 border border-destructive/20 rounded-md p-6 max-w-md w-full mx-4">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-destructive" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
+              <AlertTriangle className="h-5 w-5 text-destructive" />
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-destructive">Unable to load event</h3>
@@ -399,17 +398,13 @@ export function EditEventPage() {
               </li>
               <li>
                 <div className="flex items-center">
-                  <svg className="flex-shrink-0 h-5 w-5 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                  </svg>
+                  <ChevronRight className="h-5 w-5 text-accent-foreground" />
                   <span className="ml-4 text-sm font-medium text-gray-500">{originalEvent?.title}</span>
                 </div>
               </li>
               <li>
                 <div className="flex items-center">
-                  <svg className="flex-shrink-0 h-5 w-5 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                  </svg>
+                  <ChevronRight className="h-5 w-5 text-accent-foreground" />
                   <span className="ml-4 text-sm font-medium text-gray-900">Edit</span>
                 </div>
               </li>
@@ -728,9 +723,10 @@ export function EditEventPage() {
                         </>
                       ) : (
                         <>
-                          <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          {/* <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                          </svg>
+                          </svg> */}
+                          <CloudUpload className="h-4 w-4 mr-2" />
                           Upload Image
                         </>
                       )}
@@ -742,9 +738,10 @@ export function EditEventPage() {
                         onClick={handleRemoveImage}
                         className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                       >
-                        <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {/* <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                        </svg> */}
+                        <Trash2 className="h-4 w-4 mr-2" />
                         Remove
                       </button>
                     )}

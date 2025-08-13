@@ -1,3 +1,4 @@
+import { AlertTriangle } from 'lucide-react';
 // Create Event Page component for Admin users to create new events
 
 import { useState, useEffect } from 'react';
@@ -6,26 +7,6 @@ import { X, ArrowLeft, Save, Trash2, Loader2 } from 'lucide-react';
 import { apiService } from '../api';
 import type { CreateEventRequest } from '../contracts/request/EventRequests';
 import { ApiResponseHandler, ApiError, ValidationError } from '../types';
-// import { ApiResponseHandler, ApiError, ValidationError } from               {/* Event Date */}
-//               <div>
-//                 <label htmlFor="eventDate" className="block text-sm font-medium text-foreground">
-//                   Event Date <span className="text-destructive">*</span>
-//                 </label>
-//                 <input
-//                   type="datetime-local"
-//                   id="eventDate"
-//                   name="eventDate"
-//                   value={formData.eventDate}
-//                   onChange={handleInputChange}
-//                   min={minDateTime}
-//                   className={`mt-1 block w-full rounded-md border-border shadow-sm focus:border-ring focus:ring-ring ${
-//                     fieldErrors.eventDate ? 'border-destructive' : ''
-//                   }`}
-//                 />
-//                 {fieldErrors.eventDate && (
-//                   <p className="mt-1 text-sm text-destructive">{fieldErrors.eventDate}</p>
-//                 )}
-//               </div>type { CreateEventRequest } from '../contracts/request/EventRequests';
 
 export function CreateEventPage() {
   const navigate = useNavigate();
@@ -285,9 +266,7 @@ export function CreateEventPage() {
               </li>
               <li>
                 <div className="flex items-center">
-                  <svg className="flex-shrink-0 h-5 w-5 text-border" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                  </svg>
+                  <AlertTriangle className="flex-shrink-0 h-5 w-5 text-border" />
                   <span className="ml-4 text-sm font-medium text-foreground">Create Event</span>
                 </div>
               </li>
