@@ -115,18 +115,18 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                      formData.userName.trim() !== '';
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-foreground">
             Create your account
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-muted-foreground">
             Or{' '}
             <button
               onClick={() => navigate('/login')}
-              className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
+              className="font-medium text-primary hover:text-primary/80 transition-colors"
             >
               sign in to your existing account
             </button>
@@ -138,7 +138,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
           <div className="rounded-md shadow-sm space-y-4">
             {/* Email Input */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
                 Email address *
               </label>
               <input
@@ -150,18 +150,18 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                 value={formData.email}
                 onChange={handleInputChange}
                 className={`appearance-none relative block w-full px-3 py-2 border ${
-                  fieldErrors.email ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                  fieldErrors.email ? 'border-destructive' : 'border-border'
+                } placeholder-muted-foreground text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring focus:z-10 sm:text-sm`}
                 placeholder="Enter your email"
               />
               {fieldErrors.email && (
-                <p className="mt-1 text-sm text-red-600">{fieldErrors.email}</p>
+                <p className="mt-1 text-sm text-destructive">{fieldErrors.email}</p>
               )}
             </div>
 
             {/* Username Input */}
             <div>
-              <label htmlFor="userName" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="userName" className="block text-sm font-medium text-foreground mb-1">
                 Username *
               </label>
               <input
@@ -173,18 +173,18 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                 value={formData.userName}
                 onChange={handleInputChange}
                 className={`appearance-none relative block w-full px-3 py-2 border ${
-                  fieldErrors.username || fieldErrors.userName ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                  fieldErrors.username || fieldErrors.userName ? 'border-destructive' : 'border-border'
+                } placeholder-muted-foreground text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring focus:z-10 sm:text-sm`}
                 placeholder="Choose a username"
               />
               {(fieldErrors.username || fieldErrors.userName) && (
-                <p className="mt-1 text-sm text-red-600">{fieldErrors.username || fieldErrors.userName}</p>
+                <p className="mt-1 text-sm text-destructive">{fieldErrors.username || fieldErrors.userName}</p>
               )}
             </div>
 
             {/* Password Input */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
                 Password *
               </label>
               <input
@@ -196,21 +196,21 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                 value={formData.password}
                 onChange={handleInputChange}
                 className={`appearance-none relative block w-full px-3 py-2 border ${
-                  fieldErrors.password ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                  fieldErrors.password ? 'border-destructive' : 'border-border'
+                } placeholder-muted-foreground text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring focus:z-10 sm:text-sm`}
                 placeholder="Create a password (min. 8 characters)"
               />
               {fieldErrors.password && (
-                <p className="mt-1 text-sm text-red-600">{fieldErrors.password}</p>
+                <p className="mt-1 text-sm text-destructive">{fieldErrors.password}</p>
               )}
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Password must be at least 8 characters long
               </p>
             </div>
 
             {/* First Name Input */}
             <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="firstName" className="block text-sm font-medium text-foreground mb-1">
                 First Name
               </label>
               <input
@@ -221,18 +221,18 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                 value={formData.firstName}
                 onChange={handleInputChange}
                 className={`appearance-none relative block w-full px-3 py-2 border ${
-                  fieldErrors.firstName ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                  fieldErrors.firstName ? 'border-destructive' : 'border-border'
+                } placeholder-muted-foreground text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring focus:z-10 sm:text-sm`}
                 placeholder="Enter your first name (optional)"
               />
               {fieldErrors.firstName && (
-                <p className="mt-1 text-sm text-red-600">{fieldErrors.firstName}</p>
+                <p className="mt-1 text-sm text-destructive">{fieldErrors.firstName}</p>
               )}
             </div>
 
             {/* Last Name Input */}
             <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="lastName" className="block text-sm font-medium text-foreground mb-1">
                 Last Name
               </label>
               <input
@@ -243,18 +243,18 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                 value={formData.lastName}
                 onChange={handleInputChange}
                 className={`appearance-none relative block w-full px-3 py-2 border ${
-                  fieldErrors.lastName ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                  fieldErrors.lastName ? 'border-destructive' : 'border-border'
+                } placeholder-muted-foreground text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring focus:z-10 sm:text-sm`}
                 placeholder="Enter your last name (optional)"
               />
               {fieldErrors.lastName && (
-                <p className="mt-1 text-sm text-red-600">{fieldErrors.lastName}</p>
+                <p className="mt-1 text-sm text-destructive">{fieldErrors.lastName}</p>
               )}
             </div>
 
             {/* Phone Number Input */}
             <div>
-              <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="phoneNumber" className="block text-sm font-medium text-foreground mb-1">
                 Phone Number
               </label>
               <input
@@ -265,33 +265,33 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
                 value={formData.phoneNumber}
                 onChange={handleInputChange}
                 className={`appearance-none relative block w-full px-3 py-2 border ${
-                  fieldErrors.phoneNumber ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                  fieldErrors.phoneNumber ? 'border-destructive' : 'border-border'
+                } placeholder-muted-foreground text-foreground rounded-md focus:outline-none focus:ring-ring focus:border-ring focus:z-10 sm:text-sm`}
                 placeholder="Enter your phone number (optional)"
               />
               {fieldErrors.phoneNumber && (
-                <p className="mt-1 text-sm text-red-600">{fieldErrors.phoneNumber}</p>
+                <p className="mt-1 text-sm text-destructive">{fieldErrors.phoneNumber}</p>
               )}
             </div>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-3">
+            <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3">
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <X className="h-5 w-5 text-red-400" />
+                  <X className="h-5 w-5 text-destructive" />
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm text-red-800">{error}</p>
+                  <p className="text-sm text-destructive">{error}</p>
                 </div>
               </div>
             </div>
           )}
 
           {/* Required Fields Notice */}
-          <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-            <p className="text-sm text-blue-800">
+          <div className="bg-primary/10 border border-primary/20 rounded-md p-3">
+            <p className="text-sm text-primary">
               * Required fields. Optional fields can be filled in later in your profile.
             </p>
           </div>
@@ -301,11 +301,11 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
             <button
               type="submit"
               disabled={!isFormValid || loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? (
                 <div className="flex items-center">
-                  <Loader2 className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
+                  <Loader2 className="animate-spin -ml-1 mr-3 h-5 w-5 text-primary-foreground" />
                   Creating account...
                 </div>
               ) : (
@@ -320,7 +320,7 @@ export function RegisterPage({ onRegisterSuccess }: RegisterPageProps) {
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="font-medium text-gray-600 hover:text-gray-500 transition-colors flex items-center"
+                className="font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center"
               >
                 <ArrowLeft className="h-4 w-4 mr-1" />
                 Back to home

@@ -197,7 +197,13 @@ export function EditEventPage() {
     try {
       console.log('Updating event with data:', formData);
       
-      const response = await apiService.updateEvent(eventId, formData);
+      const request : UpdateEventRequest = {
+        ...formData,
+        eventDate: new Date(formData.eventDate).toISOString(),
+        registrationCutoffDate: new Date(formData.registrationCutoffDate).toISOString()
+      }
+
+      const response = await apiService.updateEvent(eventId, request);
       const updatedEvent = ApiResponseHandler.handleResponse(response);
       
       console.log('Event updated successfully:', updatedEvent);
@@ -272,6 +278,7 @@ export function EditEventPage() {
       console.log('Uploading event image file:', selectedImageFile.name);
       
       const response = await apiService.uploadEventImage(eventId, selectedImageFile);
+
       const result = ApiResponseHandler.handleResponse(response);
       
       console.log('Image uploaded successfully:', result);
@@ -332,10 +339,10 @@ export function EditEventPage() {
 
   if (initialLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <div className="flex justify-center items-center min-h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-gray-600">Loading event data...</span>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <span className="ml-3 text-muted-foreground">Loading event data...</span>
         </div>
       </div>
     );
@@ -343,27 +350,27 @@ export function EditEventPage() {
 
   if (error && !originalEvent) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-red-50 border border-red-200 rounded-md p-6 max-w-md w-full mx-4">
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-md p-6 max-w-md w-full mx-4">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <svg className="h-5 w-5 text-destructive" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">Unable to load event</h3>
-              <p className="mt-2 text-sm text-red-700">{error}</p>
+              <h3 className="text-sm font-medium text-destructive">Unable to load event</h3>
+              <p className="mt-2 text-sm text-destructive">{error}</p>
               <div className="mt-4 flex space-x-3">
                 <button
                   onClick={() => eventId && loadEventData(eventId)}
-                  className="text-sm text-red-600 hover:text-red-500 font-medium"
+                  className="text-sm text-destructive hover:text-destructive/80 font-medium"
                 >
                   Try again
                 </button>
                 <button
                   onClick={() => navigate('/admin/my-events')}
-                  className="text-sm text-red-600 hover:text-red-500 font-medium"
+                  className="text-sm text-destructive hover:text-destructive/80 font-medium"
                 >
                   Back to events
                 </button>

@@ -200,10 +200,10 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading event details...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading event details...</p>
         </div>
       </div>
     );
@@ -211,17 +211,17 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center max-w-md mx-auto">
-          <svg className="mx-auto h-12 w-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="mx-auto h-12 w-12 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 14.5c-.77.833.192 2.5 1.732 2.5z" />
           </svg>
-          <h2 className="mt-4 text-xl font-semibold text-gray-900">Error</h2>
-          <p className="mt-2 text-gray-600">{error}</p>
+          <h2 className="mt-4 text-xl font-semibold text-foreground">Error</h2>
+          <p className="mt-2 text-muted-foreground">{error}</p>
           <div className="mt-6 space-x-4">
             <button
               onClick={handleBackNavigation}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+              className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
             >
               {source === 'calendar' ? 'Back to Calendar' : 'Back to Events'}
             </button>
@@ -241,12 +241,12 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
 
   if (!event) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600">Event not found</p>
+          <p className="text-muted-foreground">Event not found</p>
           <button
             onClick={handleBackNavigation}
-            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+            className="mt-4 bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
           >
             {source === 'calendar' ? 'Back to Calendar' : 'Back to Events'}
           </button>
@@ -261,9 +261,9 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
   const cutoffInfo = formatRegistrationCutoff(event.registrationCutoffDate);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Hero Section with Image */}
-      <div className="relative h-96 bg-gray-900 overflow-hidden">
+      <div className="relative h-96 bg-muted overflow-hidden">
         {event.imageUrl ? (
           <img
             src={event.imageUrl}
@@ -271,8 +271,8 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600 to-purple-700">
-            <svg className="h-24 w-24 text-white opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-chart-2">
+            <svg className="h-24 w-24 text-primary-foreground opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
@@ -283,7 +283,7 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
         <div className="absolute top-4 left-4">
           <button
             onClick={handleBackNavigation}
-            className="flex items-center text-white hover:text-gray-200 transition-colors"
+            className="flex items-center text-white hover:text-white/80 transition-colors"
           >
             <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />

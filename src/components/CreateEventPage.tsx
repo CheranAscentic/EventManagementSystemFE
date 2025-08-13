@@ -4,8 +4,28 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, ArrowLeft, Save, Trash2, Loader2 } from 'lucide-react';
 import { apiService } from '../api';
-import { ApiResponseHandler, ApiError, ValidationError } from '../types';
 import type { CreateEventRequest } from '../contracts/request/EventRequests';
+import { ApiResponseHandler, ApiError, ValidationError } from '../types';
+// import { ApiResponseHandler, ApiError, ValidationError } from               {/* Event Date */}
+//               <div>
+//                 <label htmlFor="eventDate" className="block text-sm font-medium text-foreground">
+//                   Event Date <span className="text-destructive">*</span>
+//                 </label>
+//                 <input
+//                   type="datetime-local"
+//                   id="eventDate"
+//                   name="eventDate"
+//                   value={formData.eventDate}
+//                   onChange={handleInputChange}
+//                   min={minDateTime}
+//                   className={`mt-1 block w-full rounded-md border-border shadow-sm focus:border-ring focus:ring-ring ${
+//                     fieldErrors.eventDate ? 'border-destructive' : ''
+//                   }`}
+//                 />
+//                 {fieldErrors.eventDate && (
+//                   <p className="mt-1 text-sm text-destructive">{fieldErrors.eventDate}</p>
+//                 )}
+//               </div>type { CreateEventRequest } from '../contracts/request/EventRequests';
 
 export function CreateEventPage() {
   const navigate = useNavigate();
@@ -128,8 +148,14 @@ export function CreateEventPage() {
 
     try {
       console.log('Creating event with data:', formData);
+
+      const resquest : CreateEventRequest = {
+        ...formData,
+        eventDate: new Date(formData.eventDate).toISOString(),
+        registrationCutoffDate: new Date(formData.registrationCutoffDate).toISOString()
+      }
       
-      const response = await apiService.createEvent(formData);
+      const response = await apiService.createEvent(resquest);
       const createdEvent = ApiResponseHandler.handleResponse(response);
       
       console.log('Event created successfully:', createdEvent);
@@ -243,7 +269,7 @@ export function CreateEventPage() {
   const minDateTime = now.toISOString().slice(0, 16);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background py-8">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
@@ -252,39 +278,39 @@ export function CreateEventPage() {
               <li>
                 <button
                   onClick={() => navigate('/admin/my-events')}
-                  className="text-sm font-medium text-gray-500 hover:text-gray-700"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground"
                 >
                   My Events
                 </button>
               </li>
               <li>
                 <div className="flex items-center">
-                  <svg className="flex-shrink-0 h-5 w-5 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                  <svg className="flex-shrink-0 h-5 w-5 text-border" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                   </svg>
-                  <span className="ml-4 text-sm font-medium text-gray-900">Create Event</span>
+                  <span className="ml-4 text-sm font-medium text-foreground">Create Event</span>
                 </div>
               </li>
             </ol>
           </nav>
           
-          <h1 className="mt-4 text-3xl font-bold text-gray-900">Create New Event</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="mt-4 text-3xl font-bold text-foreground">Create New Event</h1>
+          <p className="mt-2 text-muted-foreground">
             Fill out the form below to create a new event for your organization.
           </p>
         </div>
 
         {/* Form */}
         <div className="max-w-2xl">
-          <div className="bg-white shadow rounded-lg p-6">
+          <div className="bg-card shadow rounded-lg p-6 border border-border">
             {error && (
-              <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+              <div className="mb-6 bg-destructive/10 border border-destructive/20 rounded-md p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <X className="h-5 w-5 text-red-400" />
+                    <X className="h-5 w-5 text-destructive" />
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm text-red-800">{error}</p>
+                    <p className="text-sm text-destructive">{error}</p>
                   </div>
                 </div>
               </div>
@@ -293,8 +319,8 @@ export function CreateEventPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Event Title */}
               <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-                  Event Title *
+                <label htmlFor="title" className="block text-sm font-medium text-foreground">
+                  Event Title <span className="text-destructive">*</span>
                 </label>
                 <input
                   type="text"
@@ -302,19 +328,19 @@ export function CreateEventPage() {
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
-                  className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-                    fieldErrors.title ? 'border-red-300' : ''
+                  className={`mt-1 block w-full rounded-md border-border shadow-sm focus:border-ring focus:ring-ring ${
+                    fieldErrors.title ? 'border-destructive' : ''
                   }`}
                   placeholder="Enter event title"
                 />
                 {fieldErrors.title && (
-                  <p className="mt-1 text-sm text-red-600">{fieldErrors.title}</p>
+                  <p className="mt-1 text-sm text-destructive">{fieldErrors.title}</p>
                 )}
               </div>
 
               {/* Event Description */}
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="description" className="block text-sm font-medium text-foreground">
                   Description
                 </label>
                 <textarea
@@ -323,13 +349,13 @@ export function CreateEventPage() {
                   rows={4}
                   value={formData.description}
                   onChange={handleInputChange}
-                  className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-                    fieldErrors.description ? 'border-red-300' : ''
+                  className={`mt-1 block w-full rounded-md border-border shadow-sm focus:border-ring focus:ring-ring ${
+                    fieldErrors.description ? 'border-destructive' : ''
                   }`}
                   placeholder="Enter event description"
                 />
                 {fieldErrors.description && (
-                  <p className="mt-1 text-sm text-red-600">{fieldErrors.description}</p>
+                  <p className="mt-1 text-sm text-destructive">{fieldErrors.description}</p>
                 )}
               </div>
 
