@@ -31,13 +31,13 @@ export function Navigation({
   };
 
   return (
-    <nav className="bg-white shadow-lg border-b border-gray-200">
+    <nav className="bg-card shadow-lg border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo and brand */}
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <Link to="/" className="text-xl font-bold text-gray-800 hover:text-gray-600 transition-colors">
+              <Link to="/" className="text-xl font-bold text-card-foreground hover:text-muted-foreground transition-colors">
                 CalVender
               </Link>
             </div>
@@ -48,14 +48,14 @@ export function Navigation({
             {/* Events Calendar Link */}
             <Link
               to="/events/calendar"
-              className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
               Events Calendar
             </Link>
             {/* Navigation Links */}
             {/* <Link
               to="/events"
-              className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
               Events
             </Link> */}
@@ -63,7 +63,7 @@ export function Navigation({
             {isLoggedIn && (
               <Link
                 to="/my-registrations"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 My Event Registrations
               </Link>
@@ -73,13 +73,13 @@ export function Navigation({
               <>
                 <Link
                   to="/admin/my-events"
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   My Events
                 </Link>
                 {/* <Link
                   to="/dashboard"
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   Dashboard
                 </Link> */}
@@ -89,12 +89,12 @@ export function Navigation({
             {/* User Actions */}
             {isLoggedIn ? (
               <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-muted-foreground">
                   Welcome, {userName}
                 </span>
                 <button
                   onClick={onLogout}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="bg-destructive hover:bg-destructive/90 text-destructive-foreground px-4 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   Logout
                 </button>
@@ -103,13 +103,13 @@ export function Navigation({
               <div className="flex items-center space-x-4">
                 <button
                   onClick={handleLoginClick}
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   Login
                 </button>
                 <button
                   onClick={handleRegisterClick}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   Register
                 </button>
@@ -121,7 +121,7 @@ export function Navigation({
           <div className="md:hidden flex items-center">
             <button
               onClick={toggleMobileMenu}
-              className="text-gray-600 hover:text-gray-900 focus:outline-none focus:text-gray-900 p-2"
+              className="text-muted-foreground hover:text-foreground focus:outline-none focus:text-foreground p-2"
               aria-label="Toggle menu"
             >
               <Menu className="h-6 w-6" />
@@ -132,10 +132,10 @@ export function Navigation({
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 border-t border-gray-200">
+            <div className="px-2 pt-2 pb-3 space-y-1 border-t border-border">
               <Link
                 to="/events"
-                className="text-gray-600 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium transition-colors"
+                className="text-muted-foreground hover:text-foreground block px-3 py-2 rounded-md text-base font-medium transition-colors"
               >
                 Events
               </Link>
@@ -143,7 +143,7 @@ export function Navigation({
               {isLoggedIn && (
                 <Link
                   to="/my-registrations"
-                  className="text-gray-600 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium transition-colors"
+                  className="text-muted-foreground hover:text-foreground block px-3 py-2 rounded-md text-base font-medium transition-colors"
                 >
                   My Registrations
                 </Link>
@@ -153,13 +153,13 @@ export function Navigation({
                 <>
                   <Link
                     to="/admin/my-events"
-                    className="text-gray-600 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium transition-colors"
+                    className="text-muted-foreground hover:text-foreground block px-3 py-2 rounded-md text-base font-medium transition-colors"
                   >
                     My Events
                   </Link>
                   <Link
                     to="/dashboard"
-                    className="text-gray-600 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium transition-colors"
+                    className="text-muted-foreground hover:text-foreground block px-3 py-2 rounded-md text-base font-medium transition-colors"
                   >
                     Dashboard
                   </Link>
@@ -168,30 +168,30 @@ export function Navigation({
 
               {/* Mobile User Actions */}
               {isLoggedIn ? (
-                <div className="border-t border-gray-200 pt-4">
+                <div className="border-t border-border pt-4">
                   <div className="px-3 py-2">
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-muted-foreground">
                       Welcome, {userName}
                     </span>
                   </div>
                   <button
                     onClick={onLogout}
-                    className="w-full text-left bg-red-600 hover:bg-red-700 text-white block px-3 py-2 rounded-md text-base font-medium transition-colors"
+                    className="w-full text-left bg-destructive hover:bg-destructive/90 text-destructive-foreground block px-3 py-2 rounded-md text-base font-medium transition-colors"
                   >
                     Logout
                   </button>
                 </div>
               ) : (
-                <div className="border-t border-gray-200 pt-4 space-y-2">
+                <div className="border-t border-border pt-4 space-y-2">
                   <button
                     onClick={handleLoginClick}
-                    className="w-full text-left text-gray-600 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium transition-colors"
+                    className="w-full text-left text-muted-foreground hover:text-foreground block px-3 py-2 rounded-md text-base font-medium transition-colors"
                   >
                     Login
                   </button>
                   <button
                     onClick={handleRegisterClick}
-                    className="w-full text-left bg-blue-600 hover:bg-blue-700 text-white block px-3 py-2 rounded-md text-base font-medium transition-colors"
+                    className="w-full text-left bg-primary hover:bg-primary/90 text-primary-foreground block px-3 py-2 rounded-md text-base font-medium transition-colors"
                   >
                     Register
                   </button>

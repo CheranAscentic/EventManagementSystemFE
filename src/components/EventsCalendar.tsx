@@ -210,7 +210,7 @@ export function EventsCalendar() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Custom Day View */}
         {currentView === 'dayView' && selectedDayDate && (
@@ -219,7 +219,7 @@ export function EventsCalendar() {
             <div className="mb-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  <h1 className="text-3xl font-bold text-foreground mb-2">
                     Day View - {selectedDayDate.toLocaleDateString('en-US', { 
                       weekday: 'long', 
                       year: 'numeric', 
@@ -227,13 +227,13 @@ export function EventsCalendar() {
                       day: 'numeric' 
                     })}
                   </h1>
-                  <p className="text-gray-600">
+                  <p className="text-muted-foreground">
                     Events for the selected day. Click on any event to see details.
                   </p>
                 </div>
                 <button
                   onClick={handleBackToMonth}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/80 transition-colors"
                 >
                   ← Back to Calendar
                 </button>
@@ -241,15 +241,15 @@ export function EventsCalendar() {
             </div>
 
             {/* Day Events */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Events Today</h2>
+            <div className="bg-card rounded-lg shadow-sm border border-border p-6">
+              <h2 className="text-xl font-semibold text-foreground mb-4">Events Today</h2>
               
               {loading ? (
                 <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
               ) : error ? (
-                <div className="text-red-600 text-center py-8">
+                <div className="text-destructive text-center py-8">
                   <p>{error}</p>
                 </div>
               ) : (
@@ -276,14 +276,14 @@ export function EventsCalendar() {
                     .map((event: Event) => (
                       <div 
                         key={event.id}
-                        className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                        className="border border-border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
                         onClick={() => handleEventClick({ event: { id: event.id } })}
                       >
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
-                            <h3 className="font-medium text-gray-900 mb-1">{event.title}</h3>
-                            <p className="text-sm text-gray-600 mb-2">{event.description}</p>
-                            <div className="text-sm text-gray-500">
+                            <h3 className="font-medium text-foreground mb-1">{event.title}</h3>
+                            <p className="text-sm text-muted-foreground mb-2">{event.description}</p>
+                            <div className="text-sm text-muted-foreground">
                               <p>
                                 {new Date(event.eventDate).toLocaleString('en-US', {
                                   hour: 'numeric',
@@ -296,7 +296,7 @@ export function EventsCalendar() {
                             </div>
                           </div>
                           <div className="ml-4">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
                               {event.type}
                             </span>
                           </div>
@@ -319,7 +319,7 @@ export function EventsCalendar() {
                     
                     return matchesSearch && matchesType && matchesDate;
                   }).length === 0 && (
-                    <div className="text-center py-8 text-gray-500">
+                    <div className="text-center py-8 text-muted-foreground">
                       <p>No events scheduled for this day.</p>
                     </div>
                   )}
@@ -334,8 +334,8 @@ export function EventsCalendar() {
           <>
             {/* Header */}
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Events Calendar</h1>
-              <p className="text-gray-600">
+              <h1 className="text-3xl font-bold text-foreground mb-2">Events Calendar</h1>
+              <p className="text-muted-foreground">
                 View events in month, week, or day format. Click on any event to see details or click on dates to navigate.
               </p>
             </div>
@@ -345,11 +345,11 @@ export function EventsCalendar() {
           {/* Main Calendar Area - Left Side (3/4 width) */}
           <div className="lg:col-span-3">
             {/* Search and Filters */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+            <div className="bg-card rounded-lg shadow-sm border border-border p-6 mb-8">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Search Input */}
                 <div>
-                  <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="search" className="block text-sm font-medium text-foreground mb-2">
                     Search Events
                   </label>
                   <input
@@ -358,20 +358,20 @@ export function EventsCalendar() {
                     placeholder="Search by title, description, or location..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-border rounded-md focus:ring-ring focus:border-ring"
                   />
                 </div>
 
                 {/* Event Type Filter */}
                 <div>
-                  <label htmlFor="type-filter" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="type-filter" className="block text-sm font-medium text-foreground mb-2">
                     Event Type
                   </label>
                   <select
                     id="type-filter"
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-border rounded-md focus:ring-ring focus:border-ring"
                   >
                     <option value="">All Types</option>
                     {eventTypes.map(type => (
@@ -384,7 +384,7 @@ export function EventsCalendar() {
                 <div className="flex items-end">
                   <button
                     onClick={clearFilters}
-                    className="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors"
+                    className="w-full bg-muted text-muted-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
                   >
                     Clear Filters
                   </button>
@@ -393,16 +393,16 @@ export function EventsCalendar() {
 
               {/* Filter Summary */}
               {(searchTerm || selectedType) && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <div className="mt-4 pt-4 border-t border-border">
+                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                     <span>Active filters:</span>
                     {searchTerm && (
-                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      <span className="bg-primary/10 text-primary px-2 py-1 rounded">
                         Search: "{searchTerm}"
                       </span>
                     )}
                     {selectedType && (
-                      <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                      <span className="bg-secondary/10 text-secondary-foreground px-2 py-1 rounded">
                         Type: {selectedType}
                       </span>
                     )}
@@ -413,18 +413,18 @@ export function EventsCalendar() {
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+              <div className="bg-destructive/10 border border-destructive/20 rounded-md p-4 mb-6">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <svg className="h-5 w-5 text-destructive" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm text-red-800">{error}</p>
+                    <p className="text-sm text-destructive">{error}</p>
                     <button
                       onClick={loadEvents}
-                      className="mt-2 text-sm text-red-600 hover:text-red-500 font-medium"
+                      className="mt-2 text-sm text-destructive hover:text-destructive/80 font-medium"
                     >
                       Try again
                     </button>
@@ -435,16 +435,16 @@ export function EventsCalendar() {
 
             {/* Loading State */}
             {/* {loading && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-6">
+              <div className="bg-card rounded-lg shadow-sm border border-border p-8 mb-6">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="mt-2 text-gray-600">Loading calendar events...</p>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                  <p className="mt-2 text-muted-foreground">Loading calendar events...</p>
                 </div>
               </div>
             )} */}
 
             {/* Calendar */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-card rounded-lg shadow-sm border border-border p-6">
               <FullCalendar
                 plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
                 initialView="dayGridMonth"
@@ -485,16 +485,16 @@ export function EventsCalendar() {
             </div>
 
             {/* Legend */}
-            <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-sm font-medium text-gray-900 mb-3">Legend</h3>
+            <div className="mt-6 bg-card rounded-lg shadow-sm border border-border p-4">
+              <h3 className="text-sm font-medium text-foreground mb-3">Legend</h3>
               <div className="flex items-center space-x-6">
                 <div className="flex items-center">
-                  <div className="w-4 h-4 bg-green-500 rounded mr-2"></div>
-                  <span className="text-sm text-gray-600">Available for registration</span>
+                  <div className="w-4 h-4 bg-chart-2 rounded mr-2"></div>
+                  <span className="text-sm text-muted-foreground">Available for registration</span>
                 </div>
                 <div className="flex items-center">
-                  <div className="w-4 h-4 bg-red-500 rounded mr-2"></div>
-                  <span className="text-sm text-gray-600">Full or registration closed</span>
+                  <div className="w-4 h-4 bg-destructive rounded mr-2"></div>
+                  <span className="text-sm text-muted-foreground">Full or registration closed</span>
                 </div>
               </div>
             </div>
@@ -502,16 +502,16 @@ export function EventsCalendar() {
 
           {/* Sidebar - Right Side (1/4 width) */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden top-8 h-full">
+            <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden top-8 h-full">
               {/* Sidebar Header */}
-              <div className="p-6 border-b border-gray-200">
+              <div className="p-6 border-b border-border">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">Events List</h3>
-                  <span className="text-sm text-gray-500">{events.length} events</span>
+                  <h3 className="text-lg font-medium text-foreground">Events List</h3>
+                  <span className="text-sm text-muted-foreground">{events.length} events</span>
                 </div>
                 <button
                   onClick={() => navigate('/events')}
-                  className="w-full bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+                  className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/80 transition-colors"
                 >
                   View All Events
                 </button>
@@ -521,18 +521,18 @@ export function EventsCalendar() {
               <div className="max-h-190 overflow-y-auto">
                 {loading ? (
                   <div className="p-6 text-center">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-2 text-sm text-gray-600">Loading...</p>
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+                    <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
                   </div>
                 ) : events.length === 0 ? (
                   <div className="p-6 text-center">
-                    <svg className="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="mx-auto h-8 w-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <p className="mt-2 text-sm text-gray-500">No events found</p>
+                    <p className="mt-2 text-sm text-muted-foreground">No events found</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-gray-200">
+                  <div className="divide-y divide-border">
                     {events.map((event) => {
                       const capacityPercentage = eventUtils.getCapacityPercentage(event);
                       const registrationStatus = eventUtils.getUIEventStatus(event);
@@ -541,10 +541,10 @@ export function EventsCalendar() {
                         <div
                           key={event.id}
                           onClick={() => handleEventClick({ event: { id: event.id } })}
-                          className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                          className="p-4 hover:bg-accent cursor-pointer transition-colors"
                         >
                           {/* Event Image */}
-                          <div className="w-full h-24 bg-gray-200 rounded-md mb-3 overflow-hidden">
+                          <div className="w-full h-24 bg-muted rounded-md mb-3 overflow-hidden">
                             {event.imageUrl ? (
                               <img
                                 src={event.imageUrl}
@@ -552,8 +552,8 @@ export function EventsCalendar() {
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200">
-                                <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/80">
+                                <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                               </div>
@@ -562,8 +562,8 @@ export function EventsCalendar() {
 
                           {/* Event Details */}
                           <div>
-                            <h4 className="font-medium text-gray-900 text-sm mb-1 line-clamp-2">{event.title}</h4>
-                            <p className="text-xs text-gray-600 mb-2">
+                            <h4 className="font-medium text-foreground text-sm mb-1 line-clamp-2">{event.title}</h4>
+                            <p className="text-xs text-muted-foreground mb-2">
                               {new Date(event.eventDate).toLocaleDateString('en-US', {
                                 month: 'short',
                                 day: 'numeric',
@@ -575,8 +575,8 @@ export function EventsCalendar() {
                             <div className="flex items-center justify-between">
                               <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                                 eventUtils.canRegister(event)
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-red-100 text-red-800'
+                                  ? 'bg-chart-2/20 text-chart-2'
+                                  : 'bg-destructive/20 text-destructive'
                               }`}>
                                 <span className="text-white" style={{ color: registrationStatus.color }}>
                                   {registrationStatus.text}
@@ -584,19 +584,19 @@ export function EventsCalendar() {
                               </span>
                               
                               {/* Capacity */}
-                              <span className="text-xs text-gray-500">
+                              <span className="text-xs text-muted-foreground">
                                 {event.noOfRegistrations}/{event.capacity}
                               </span>
                             </div>
 
                             {/* Progress Bar */}
                             <div className="mt-2">
-                              <div className="bg-gray-200 rounded-full h-1">
+                              <div className="bg-muted rounded-full h-1">
                                 <div
                                   className={`h-1 rounded-full transition-all duration-300 ${
-                                    capacityPercentage >= 90 ? 'bg-red-500' :
-                                    capacityPercentage >= 70 ? 'bg-yellow-500' :
-                                    'bg-green-500'
+                                    capacityPercentage >= 90 ? 'bg-destructive' :
+                                    capacityPercentage >= 70 ? 'bg-chart-3' :
+                                    'bg-chart-2'
                                   }`}
                                   style={{ width: `${capacityPercentage}%` }}
                                 ></div>
