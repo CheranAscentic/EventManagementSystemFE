@@ -7,6 +7,7 @@ import { X, ArrowLeft, Save, Trash2, Loader2 } from 'lucide-react';
 import { apiService } from '../api';
 import type { CreateEventRequest } from '../contracts/request/EventRequests';
 import { ApiResponseHandler, ApiError, ValidationError } from '../types';
+import { dateUtils } from '@/lib/utils';
 
 export function CreateEventPage() {
   const navigate = useNavigate();
@@ -132,8 +133,8 @@ export function CreateEventPage() {
 
       const resquest : CreateEventRequest = {
         ...formData,
-        eventDate: new Date(formData.eventDate).toISOString(),
-        registrationCutoffDate: new Date(formData.registrationCutoffDate).toISOString()
+        eventDate: dateUtils.formatEventDate(formData.eventDate),
+        registrationCutoffDate: dateUtils.formatEventDate(formData.registrationCutoffDate)
       }
       
       const response = await apiService.createEvent(resquest);

@@ -7,6 +7,7 @@ import { apiService } from '../api';
 import { ApiResponseHandler, ApiError, ValidationError } from '../types';
 import type { UpdateEventRequest } from '../contracts/request/EventRequests';
 import type { Event } from '../models';
+import { dateUtils } from '@/utils/domainUtils';
 
 export function EditEventPage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -200,8 +201,8 @@ export function EditEventPage() {
       
       const request : UpdateEventRequest = {
         ...formData,
-        eventDate: new Date(formData.eventDate).toISOString(),
-        registrationCutoffDate: new Date(formData.registrationCutoffDate).toISOString()
+        eventDate: dateUtils.formatEventDate(formData.eventDate),
+        registrationCutoffDate: dateUtils.formatEventDate(formData.registrationCutoffDate)
       }
 
       const response = await apiService.updateEvent(eventId, request);
