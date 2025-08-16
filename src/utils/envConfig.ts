@@ -14,6 +14,11 @@ export const envConfig = {
   debugApi: import.meta.env.VITE_DEBUG_API === 'true',
   logLevel: import.meta.env.VITE_LOG_LEVEL || "info",
   
+  // Token Refresh Service Configuration
+  tokenMinCheckInterval: parseInt(import.meta.env.VITE_TOKEN_MIN_CHECK_INTERVAL) || 30, // seconds
+  tokenMaxCheckInterval: parseInt(import.meta.env.VITE_TOKEN_MAX_CHECK_INTERVAL) || 300, // seconds (5 minutes)
+  tokenRefreshBufferMultiplier: parseFloat(import.meta.env.VITE_TOKEN_REFRESH_BUFFER_MULTIPLIER) || 0.1, // 10%
+  
   // Application Configuration
   appName: import.meta.env.VITE_APP_NAME || "CalVent",
   appVersion: import.meta.env.VITE_APP_VERSION || "1.0.0",

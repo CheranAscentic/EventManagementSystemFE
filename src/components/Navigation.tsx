@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu } from 'lucide-react';
+import { Menu, User, ChevronDown } from 'lucide-react';
 
 interface NavigationProps {
   isLoggedIn?: boolean;
@@ -16,10 +16,30 @@ export function Navigation({
   onLogout
 }: NavigationProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsUserDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const toggleUserDropdown = () => {
+    setIsUserDropdownOpen(!isUserDropdownOpen);
   };
 
   const handleLoginClick = () => {
@@ -28,6 +48,11 @@ export function Navigation({
 
   const handleRegisterClick = () => {
     navigate('/register');
+  };
+
+  const handleLogoutClick = () => {
+    onLogout?.();
+    navigate('/login');
   };
 
   return (
@@ -88,16 +113,44 @@ export function Navigation({
 
             {/* User Actions */}
             {isLoggedIn ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-muted-foreground">
-                  Welcome, {userName}
-                </span>
+              <div className="relative" ref={dropdownRef}>
                 <button
-                  onClick={onLogout}
-                  className="bg-destructive hover:bg-destructive/90 text-destructive-foreground px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  onClick={toggleUserDropdown}
+                  className="flex items-center space-x-2 text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
-                  Logout
+                  <div className="flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full">
+                    <User className="w-4 h-4 text-primary" />
+                  </div>
+                  <span className="hidden sm:block">{userName}</span>
+                  <ChevronDown className="w-4 h-4" />
                 </button>
+                
+                {/* User Dropdown Menu */}
+                {isUserDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-card rounded-md shadow-lg border border-border z-50">
+                    <div className="py-1">
+                      <div className="px-4 py-2 text-sm text-muted-foreground border-b border-border">
+                        Welcome, {userName}
+                      </div>
+                      <Link
+                        to="/profile"
+                        className="block px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
+                        onClick={() => setIsUserDropdownOpen(false)}
+                      >
+                        View Profile
+                      </Link>
+                      <button
+                        onClick={() => {
+                          setIsUserDropdownOpen(false);
+                          handleLogoutClick();
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex items-center space-x-4">
@@ -111,7 +164,7 @@ export function Navigation({
                   onClick={handleRegisterClick}
                   className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-sm font-medium transition-colors"
                 >
-                  Register
+                  Sign Up
                 </button>
               </div>
             )}
@@ -169,14 +222,24 @@ export function Navigation({
               {/* Mobile User Actions */}
               {isLoggedIn ? (
                 <div className="border-t border-border pt-4">
-                  <div className="px-3 py-2">
+                  <div className="px-3 py-2 flex items-center space-x-2">
+                    <div className="flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full">
+                      <User className="w-4 h-4 text-primary" />
+                    </div>
                     <span className="text-sm text-muted-foreground">
                       Welcome, {userName}
                     </span>
                   </div>
+                  <Link
+                    to="/profile"
+                    className="block px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md transition-colors mx-2"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    View Profile
+                  </Link>
                   <button
-                    onClick={onLogout}
-                    className="w-full text-left bg-destructive hover:bg-destructive/90 text-destructive-foreground block px-3 py-2 rounded-md text-base font-medium transition-colors"
+                    onClick={handleLogoutClick}
+                    className="w-full text-left bg-destructive hover:bg-destructive/90 text-destructive-foreground block px-3 py-2 rounded-md text-base font-medium transition-colors mx-2 mt-2"
                   >
                     Logout
                   </button>
@@ -193,7 +256,7 @@ export function Navigation({
                     onClick={handleRegisterClick}
                     className="w-full text-left bg-primary hover:bg-primary/90 text-primary-foreground block px-3 py-2 rounded-md text-base font-medium transition-colors"
                   >
-                    Register
+                    Sign Up
                   </button>
                 </div>
               )}

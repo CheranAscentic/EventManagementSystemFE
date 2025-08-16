@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
 import { Navigation, HomePage, LoginPage, RegisterPage, EventsPage, EventDetailPage, CreateEventPage, EditEventPage, MyRegistrationsPage } from './components'
@@ -7,74 +7,119 @@ import { EventDashboard } from './components/EventDashboard'
 import { apiService } from './api'
 import type { AppUser } from './models'
 import { EventsCalendar } from './components/EventsCalendar'
+import { decodeJwtToAppUser } from './utils/jwtUtils'
+import { tokenRefreshService } from './services'
 
 function App() {
   // Authentication state management
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [currentUser, setCurrentUser] = useState<AppUser | null>(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
   // const navigate = useNavigate()
+
+  // SIMPLIFIED: Use ApiService
+  const handleLogout = useCallback(() => {
+    setIsLoggedIn(false);
+    setCurrentUser(null);
+    
+    // Stop automatic token refresh service
+    tokenRefreshService.stop();
+    
+    // Clear all tokens
+    apiService.clearAllTokens();
+    
+    console.log('User logged out and all tokens cleared');
+  }, [setIsLoggedIn, setCurrentUser]);
+
+  // SIMPLIFIED: Use ApiService for all token operations
+  const attemptTokenRefresh = useCallback(async (): Promise<boolean> => {
+    try {
+      const refreshedCredentials = await apiService.refreshTokens();
+      
+      if (refreshedCredentials) {
+        const user = decodeJwtToAppUser(refreshedCredentials.authToken);
+        if (user) {
+          setCurrentUser(user);
+          setIsLoggedIn(true);
+          
+          // Start automatic token refresh service for existing sessions
+          tokenRefreshService.start(
+            // On successful token refresh, update current user
+            (refreshedUser: AppUser) => {
+              setCurrentUser(refreshedUser);
+              console.log('Token refreshed automatically, user updated:', refreshedUser);
+            },
+            // On token refresh failure, logout user
+            () => {
+              console.log('Token refresh failed, logging out user');
+              handleLogout();
+            }
+          );
+          
+          console.log('Token refresh successful, user logged in');
+          return true;
+        }
+      }
+      
+      console.log('Token refresh failed or invalid user data');
+      return false;
+    } catch (error) {
+      console.error('Error during token refresh:', error);
+      return false;
+    }
+  }, [setCurrentUser, setIsLoggedIn, handleLogout]);
 
   // Check for existing authentication on app load
   useEffect(() => {
-    const storedUserData = localStorage.getItem('AppUser');
-    if (storedUserData) {
-      try {
-        const appUser: AppUser = JSON.parse(storedUserData);
+    const initializeAuth = async () => {
+      setIsLoading(true);
+      console.log('Checking for stored authentication...');
+      
+      // Check if we have a refresh token
+      const refreshToken = apiService.getRefreshToken();
+      
+      if (refreshToken) {
+        console.log('Refresh token found, attempting to refresh credentials');
+        const success = await attemptTokenRefresh();
         
-        // Check if token exists and is not expired
-        if (appUser.token && appUser.tokenExpiration) {
-          const expirationDate = new Date(appUser.tokenExpiration);
-          const currentDate = new Date();
-          
-          if (expirationDate > currentDate) {
-            // Token is still valid
-            console.log('Restoring user session from localStorage');
-            setIsLoggedIn(true);
-            setCurrentUser(appUser);
-            apiService.setAuthToken(appUser.token);
-          } else {
-            // Token has expired
-            console.log('Stored token has expired, clearing user data');
-            localStorage.removeItem('AppUser');
-            localStorage.removeItem('authToken'); // Clean up old token storage
-          }
-        } else {
-          // No token or expiration data
-          console.log('No valid token found in stored user data');
-          localStorage.removeItem('AppUser');
+        if (!success) {
+          console.log('Could not refresh tokens, continuing as guest');
         }
-      } catch (error) {
-        console.error('Error parsing stored user data:', error);
-        localStorage.removeItem('AppUser');
-        localStorage.removeItem('authToken'); // Clean up old token storage
+      } else {
+        console.log('No refresh token found, continuing as guest');
       }
-    } else {
-      // Check for old token-only storage and clean it up
-      const oldToken = localStorage.getItem('authToken');
-      if (oldToken) {
-        console.log('Found old token-only storage, cleaning up');
-        localStorage.removeItem('authToken');
-      }
-    }
-  }, []);
+      
+      setIsLoading(false);
+    };
 
-  const handleLoginSuccess = (user: AppUser, token?: string) => {
+    initializeAuth();
+  }, [attemptTokenRefresh]);
+
+  // SIMPLIFIED: Just use ApiService
+  const handleLoginSuccess = (user: AppUser, authToken?: string, refreshToken?: string, authTokenExp?: string, refreshTokenExp?: string) => {
     setIsLoggedIn(true);
     setCurrentUser(user);
     
-    // Store complete user object in localStorage
-    localStorage.setItem('AppUser', JSON.stringify(user));
-    
-    // Set token in API service (use token from user object if available, fallback to parameter)
-    const authToken = user.token || token;
-    if (authToken) {
-      apiService.setAuthToken(authToken);
-      
-      // Clean up old token-only storage if it exists
-      localStorage.removeItem('authToken');
+    // Use ApiService for all token management
+    if (authToken && refreshToken) {
+      apiService.setTokens(authToken, refreshToken, authTokenExp, refreshTokenExp);
     }
     
-    console.log('User logged in and stored:', user);
+    // Start automatic token refresh service
+    tokenRefreshService.start(
+      // On successful token refresh, update current user
+      (refreshedUser: AppUser) => {
+        setCurrentUser(refreshedUser);
+        console.log('Token refreshed automatically, user updated:', refreshedUser);
+      },
+      // On token refresh failure, logout user
+      () => {
+        console.log('Token refresh failed, logging out user');
+        handleLogout();
+      }
+    );
+    
+    console.log('User logged in:', user);
   };
 
   const handleRegisterSuccess = (user: AppUser) => {
@@ -85,65 +130,60 @@ function App() {
     // handleLoginSuccess(user, token)
   }
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setCurrentUser(null);
-    
-    // Clear all authentication data from localStorage
-    localStorage.removeItem('AppUser');
-    localStorage.removeItem('authToken'); // Clean up old token storage if it exists
-    
-    // Clear token from API service
-    apiService.clearAuthToken();
-
-    // navigate('/login'); // Redirect to login page after logout
-    
-    console.log('User logged out and storage cleared');
-  };
-
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Navigation
-          isLoggedIn={isLoggedIn}
-          userRole={currentUser?.userRole}
-          userName={currentUser ? currentUser.userName || `${currentUser.firstName} ${currentUser.lastName}`.trim() : ''}
-          onLogout={handleLogout}
-        />
-        
-        <Routes>
-          {/* Route for Events Calendar */}
-          <Route path="/events/calendar" element={<EventsCalendar />} />
+    <>
+      {isLoading ? (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p className="mt-4 text-gray-600">Loading...</p>
+          </div>
+        </div>
+      ) : (
+        <Router>
+          <div className="min-h-screen bg-gray-50">
+            <Navigation
+              isLoggedIn={isLoggedIn}
+              userRole={currentUser?.userRole}
+              userName={currentUser ? currentUser.userName || `${currentUser.firstName} ${currentUser.lastName}`.trim() : ''}
+              onLogout={handleLogout}
+            />
+            
+            <Routes>
+              {/* Route for Events Calendar */}
+              <Route path="/events/calendar" element={<EventsCalendar />} />
 
-          <Route path="/" element={<HomePage />} />
-          <Route 
-            path="/login" 
-            element={<LoginPage onLoginSuccess={handleLoginSuccess} />} 
-          />
-          <Route 
-            path="/register" 
-            element={<RegisterPage onRegisterSuccess={handleRegisterSuccess} />} 
-          />
-          <Route path="/events" element={<EventsPage />} />
-          <Route path="/event/:eventId" element={<EventDetailPage currentUser={currentUser} />} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin/my-events" element={<OwnerEventsPage />} />
-          <Route path="/admin/event-dashboard/:eventId" element={<EventDashboard />} />
-          
-          {/* Placeholder routes for future pages */}
-          <Route 
-            path="/my-registrations" 
-            element={<MyRegistrationsPage currentUser={currentUser} />} 
-          />
-          <Route path="/manage-events" element={<div className="p-8 text-center">Manage Events page coming soon!</div>} />
-          <Route path="/dashboard" element={<div className="p-8 text-center">Dashboard page coming soon!</div>} />
-          <Route path="/admin/create-event" element={<CreateEventPage />} />
-          <Route path="/admin/edit-event/:eventId" element={<EditEventPage />} />
-          <Route path="*" element={<div className="p-8 text-center">Page not found!</div>} />
-        </Routes>
-      </div>
-    </Router>
+              <Route path="/" element={<HomePage />} />
+              <Route 
+                path="/login" 
+                element={<LoginPage onLoginSuccess={handleLoginSuccess} />} 
+              />
+              <Route 
+                path="/register" 
+                element={<RegisterPage onRegisterSuccess={handleRegisterSuccess} />} 
+              />
+              <Route path="/events" element={<EventsPage />} />
+              <Route path="/event/:eventId" element={<EventDetailPage currentUser={currentUser} />} />
+              
+              {/* Admin Routes */}
+              <Route path="/admin/my-events" element={<OwnerEventsPage />} />
+              <Route path="/admin/event-dashboard/:eventId" element={<EventDashboard />} />
+              
+              {/* Placeholder routes for future pages */}
+              <Route 
+                path="/my-registrations" 
+                element={<MyRegistrationsPage currentUser={currentUser} />} 
+              />
+              <Route path="/manage-events" element={<div className="p-8 text-center">Manage Events page coming soon!</div>} />
+              <Route path="/dashboard" element={<div className="p-8 text-center">Dashboard page coming soon!</div>} />
+              <Route path="/admin/create-event" element={<CreateEventPage />} />
+              <Route path="/admin/edit-event/:eventId" element={<EditEventPage />} />
+              <Route path="*" element={<div className="p-8 text-center">Page not found!</div>} />
+            </Routes>
+          </div>
+        </Router>
+      )}
+    </>
   )
 }
 
