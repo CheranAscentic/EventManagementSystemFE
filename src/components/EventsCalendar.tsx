@@ -293,6 +293,7 @@ export function EventsCalendar() {
                                 })}
                               </p>
                               <p>{event.location}</p>
+                              {event.owner && <p>Organizer: {event.owner}</p>}
                               <p>Max Attendees: {event.capacity}</p>
                             </div>
                           </div>

@@ -7,6 +7,7 @@ import { ApiResponseHandler, ApiError } from '../types';
 import type { EventRegistration, Event, AppUser } from '../models';
 import { dateUtils } from '../lib/utils';
 import { downloadEventCalendar } from '../lib/icsUtils';
+import { ClipboardX } from 'lucide-react';
 
 interface MyRegistrationsPageProps {
   currentUser: AppUser | null;
@@ -377,9 +378,10 @@ export function MyRegistrationsPage({ currentUser }: MyRegistrationsPageProps) {
         {/* Registrations List */}
         {filteredRegistrations.length === 0 ? (
           <div className="text-center py-12">
-            <svg className="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <ClipboardX className="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" />
+            {/* <svg className="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
+            </svg> */}
             <h3 className="mt-2 text-sm font-medium text-foreground">
               {activeTab === 'active' ? 'No active registrations' : 
                activeTab === 'canceled' ? 'No canceled registrations' : 'No registrations found'}

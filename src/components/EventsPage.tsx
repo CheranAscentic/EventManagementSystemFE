@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, X, Calendar, MapPin, Tag, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, X, Calendar, MapPin, Tag, ChevronLeft, ChevronRight, User } from 'lucide-react';
 import { apiService } from '../api';
 import { ApiResponseHandler, ApiError } from '../types';
 import type { Event } from '../models';
@@ -364,6 +364,12 @@ export function EventsPage() {
                         <Tag className="h-4 w-4 mr-2" />
                         {event.type}
                       </div>
+                      {event.owner && (
+                        <div className="flex items-center text-sm text-gray-500">
+                          <User className="h-4 w-4 mr-2" />
+                          {event.owner}
+                        </div>
+                      )}
                     </div>
 
                     {/* Capacity Statistics */}

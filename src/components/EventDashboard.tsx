@@ -142,10 +142,10 @@ export function EventDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <div className="flex justify-center items-center min-h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-gray-600">Loading event dashboard...</span>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <span className="ml-3 text-muted-foreground">Loading event dashboard...</span>
         </div>
       </div>
     );
@@ -153,24 +153,24 @@ export function EventDashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-red-50 border border-red-200 rounded-md p-6 max-w-md w-full mx-4">
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-md p-6 max-w-md w-full mx-4">
           <div className="flex">
             <div className="flex-shrink-0">
-              <AlertTriangle className="h-5 w-5 text-red-400" />
+              <AlertTriangle className="h-5 w-5 text-destructive" />
             </div>
             <div className="ml-3">
-              <p className="text-sm text-red-800">{error}</p>
+              <p className="text-sm text-destructive">{error}</p>
               <div className="mt-4 flex space-x-3">
                 <button
                   onClick={() => eventId && loadEventData(eventId)}
-                  className="text-sm text-red-600 hover:text-red-500 font-medium"
+                  className="text-sm text-destructive hover:text-destructive/80 font-medium"
                 >
                   Try again
                 </button>
                 <button
                   onClick={handleBackToEvents}
-                  className="text-sm text-red-600 hover:text-red-500 font-medium"
+                  className="text-sm text-destructive hover:text-destructive/80 font-medium"
                 >
                   Back to events
                 </button>
@@ -194,9 +194,9 @@ export function EventDashboard() {
   const status = eventUtils.getEventStatus(event);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
+      <div className="bg-card shadow-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-6">
             {/* Breadcrumb */}
@@ -235,11 +235,11 @@ export function EventDashboard() {
             {/* Event Header */}
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">{event.title}</h1>
-                <p className="text-gray-600 mb-4">{event.description}</p>
+                <h1 className="text-2xl font-bold text-foreground mb-2">{event.title}</h1>
+                <p className="text-muted-foreground mb-4">{event.description}</p>
                 
                 {/* Event Meta Info */}
-                <div className="flex flex-wrap items-center gap-6 text-sm text-gray-500">
+                <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-2" />
                     {dateUtils.formatEventDate(event.eventDate)}
@@ -282,14 +282,14 @@ export function EventDashboard() {
 
       {/* Tabs */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="border-b border-gray-200 mt-6">
+        <div className="border-b border-border mt-6">
           <nav className="-mb-px flex space-x-8" aria-label="Tabs">
             <button
               onClick={() => setActiveTab('overview')}
               className={`${
                 activeTab === 'overview'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
               } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center`}
             >
               <BarChart3 className="mr-2 h-4 w-4" />
@@ -299,8 +299,8 @@ export function EventDashboard() {
               onClick={() => setActiveTab('registrations')}
               className={`${
                 activeTab === 'registrations'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
               } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center`}
             >
               <Users className="mr-2 h-4 w-4" />
@@ -310,8 +310,8 @@ export function EventDashboard() {
               onClick={() => setActiveTab('analytics')}
               className={`${
                 activeTab === 'analytics'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
               } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center`}
             >
               <TrendingUp className="mr-2 h-4 w-4" />
@@ -327,24 +327,24 @@ export function EventDashboard() {
           <div className="space-y-6">
             {/* Statistics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="bg-card overflow-hidden shadow rounded-lg border border-border">
                 <div className="p-5">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
-                      <Users className="h-6 w-6 text-gray-400" />
+                      <Users className="h-6 w-6 text-primary" />
                     </div>
                     <div className="ml-5 w-0 flex-1">
                       <dl>
-                        <dt className="text-sm font-medium text-gray-500 truncate">Total Registrations</dt>
-                        <dd className="text-lg font-medium text-gray-900">{activeRegistrations.length}</dd>
+                        <dt className="text-sm font-medium text-muted-foreground truncate">Total Registrations</dt>
+                        <dd className="text-lg font-medium text-card-foreground">{activeRegistrations.length}</dd>
                       </dl>
                     </div>
                   </div>
                 </div>
-                <div className="bg-gray-50 px-5 py-3">
+                <div className="bg-muted px-5 py-3">
                   <div className="text-sm">
-                    <span className="font-medium text-gray-500">Capacity: </span>
-                    <span className="text-gray-900">{event.capacity}</span>
+                    <span className="font-medium text-muted-foreground">Capacity: </span>
+                    <span className="text-card-foreground">{event.capacity}</span>
                   </div>
                 </div>
               </div>

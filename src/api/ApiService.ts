@@ -382,6 +382,12 @@ export class ApiService {
     });
   }
 
+  async logout(): Promise<void> {
+    return this.request<void>("/api/authentication/logout", {
+      method: "POST",
+    });
+  }
+
   async registerUser(request: RegisterUserRequest): Promise<RegisterResponse> {
     return this.request<RegisterResponse>("/api/authentication/register/user", {
       method: "POST",

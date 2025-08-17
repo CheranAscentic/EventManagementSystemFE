@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, User, ChevronDown } from 'lucide-react';
 
 interface NavigationProps {
@@ -19,6 +19,24 @@ export function Navigation({
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Helper function to check if current path matches menu item
+  const isActiveRoute = (path: string): boolean => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
+
+  // Get active menu item classes
+  const getMenuItemClasses = (path: string, baseClasses: string): string => {
+    const activeClasses = isActiveRoute(path) 
+      ? "text-primary bg-primary/10 border-primary/20" 
+      : "text-muted-foreground hover:text-foreground hover:bg-accent/50";
+    
+    return `${baseClasses} ${activeClasses}`;
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -62,18 +80,21 @@ export function Navigation({
           {/* Logo and brand */}
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <Link to="/" className="text-xl font-bold text-card-foreground hover:text-muted-foreground transition-colors">
+              <Link 
+                to="/" 
+                className={getMenuItemClasses('/', "text-xl font-bold transition-colors px-3 py-2 rounded-md border")}
+              >
                 CalVender
               </Link>
             </div>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-2">
             {/* Events Calendar Link */}
             <Link
               to="/events/calendar"
-              className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              className={getMenuItemClasses('/events/calendar', "px-3 py-2 rounded-md text-sm font-medium transition-colors border")}
             >
               Events Calendar
             </Link>
@@ -88,7 +109,7 @@ export function Navigation({
             {isLoggedIn && (
               <Link
                 to="/my-registrations"
-                className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className={getMenuItemClasses('/my-registrations', "px-3 py-2 rounded-md text-sm font-medium transition-colors border")}
               >
                 My Event Registrations
               </Link>
@@ -98,7 +119,7 @@ export function Navigation({
               <>
                 <Link
                   to="/admin/my-events"
-                  className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className={getMenuItemClasses('/admin/my-events', "px-3 py-2 rounded-md text-sm font-medium transition-colors border")}
                 >
                   My Events
                 </Link>
@@ -134,7 +155,11 @@ export function Navigation({
                       </div>
                       <Link
                         to="/profile"
-                        className="block px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
+                        className={`block px-4 py-2 text-sm transition-colors ${
+                          isActiveRoute('/profile') 
+                            ? 'text-primary bg-primary/10' 
+                            : 'text-foreground hover:bg-accent'
+                        }`}
                         onClick={() => setIsUserDropdownOpen(false)}
                       >
                         View Profile
@@ -156,13 +181,13 @@ export function Navigation({
               <div className="flex items-center space-x-4">
                 <button
                   onClick={handleLoginClick}
-                  className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className={getMenuItemClasses('/login', "px-3 py-2 rounded-md text-sm font-medium transition-colors border")}
                 >
                   Login
                 </button>
                 <button
                   onClick={handleRegisterClick}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  className={getMenuItemClasses('/register', "bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-sm font-medium transition-colors border border-primary")}
                 >
                   Sign Up
                 </button>
@@ -187,16 +212,16 @@ export function Navigation({
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 border-t border-border">
               <Link
-                to="/events"
-                className="text-muted-foreground hover:text-foreground block px-3 py-2 rounded-md text-base font-medium transition-colors"
+                to="/events/calendar"
+                className={getMenuItemClasses('/events/calendar', "block px-3 py-2 rounded-md text-base font-medium transition-colors border")}
               >
-                Events
+                Events Calendar
               </Link>
               
               {isLoggedIn && (
                 <Link
                   to="/my-registrations"
-                  className="text-muted-foreground hover:text-foreground block px-3 py-2 rounded-md text-base font-medium transition-colors"
+                  className={getMenuItemClasses('/my-registrations', "block px-3 py-2 rounded-md text-base font-medium transition-colors border")}
                 >
                   My Registrations
                 </Link>
@@ -206,13 +231,13 @@ export function Navigation({
                 <>
                   <Link
                     to="/admin/my-events"
-                    className="text-muted-foreground hover:text-foreground block px-3 py-2 rounded-md text-base font-medium transition-colors"
+                    className={getMenuItemClasses('/admin/my-events', "block px-3 py-2 rounded-md text-base font-medium transition-colors border")}
                   >
                     My Events
                   </Link>
                   <Link
                     to="/dashboard"
-                    className="text-muted-foreground hover:text-foreground block px-3 py-2 rounded-md text-base font-medium transition-colors"
+                    className={getMenuItemClasses('/dashboard', "block px-3 py-2 rounded-md text-base font-medium transition-colors border")}
                   >
                     Dashboard
                   </Link>
@@ -232,7 +257,11 @@ export function Navigation({
                   </div>
                   <Link
                     to="/profile"
-                    className="block px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md transition-colors mx-2"
+                    className={`block px-3 py-2 text-sm rounded-md transition-colors mx-2 border ${
+                      isActiveRoute('/profile') 
+                        ? 'text-primary bg-primary/10 border-primary/20' 
+                        : 'text-foreground hover:bg-accent border-transparent'
+                    }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     View Profile
@@ -248,13 +277,13 @@ export function Navigation({
                 <div className="border-t border-border pt-4 space-y-2">
                   <button
                     onClick={handleLoginClick}
-                    className="w-full text-left text-muted-foreground hover:text-foreground block px-3 py-2 rounded-md text-base font-medium transition-colors"
+                    className={getMenuItemClasses('/login', "w-full text-left block px-3 py-2 rounded-md text-base font-medium transition-colors border")}
                   >
                     Login
                   </button>
                   <button
                     onClick={handleRegisterClick}
-                    className="w-full text-left bg-primary hover:bg-primary/90 text-primary-foreground block px-3 py-2 rounded-md text-base font-medium transition-colors"
+                    className={getMenuItemClasses('/register', "w-full text-left bg-primary hover:bg-primary/90 text-primary-foreground block px-3 py-2 rounded-md text-base font-medium transition-colors border border-primary")}
                   >
                     Sign Up
                   </button>

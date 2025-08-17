@@ -18,7 +18,16 @@ function App() {
   // const navigate = useNavigate()
 
   // SIMPLIFIED: Use ApiService
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
+    try {
+      // Call the logout endpoint to invalidate tokens on the server
+      await apiService.logout();
+      console.log('Logout request sent to server');
+    } catch (error) {
+      console.error('Error during logout request:', error);
+      // Continue with local logout even if server request fails
+    }
+    
     setIsLoggedIn(false);
     setCurrentUser(null);
     

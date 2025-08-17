@@ -201,8 +201,8 @@ export function EditEventPage() {
       
       const request : UpdateEventRequest = {
         ...formData,
-        eventDate: dateUtils.formatEventDate(formData.eventDate),
-        registrationCutoffDate: dateUtils.formatEventDate(formData.registrationCutoffDate)
+        eventDate: dateUtils.formatDateForApi(new Date(formData.eventDate)),
+        registrationCutoffDate: dateUtils.formatDateForApi(new Date(formData.registrationCutoffDate)),
       }
 
       const response = await apiService.updateEvent(eventId, request);
@@ -383,7 +383,7 @@ export function EditEventPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background py-8">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
@@ -392,28 +392,28 @@ export function EditEventPage() {
               <li>
                 <button
                   onClick={() => navigate('/admin/my-events')}
-                  className="text-sm font-medium text-gray-500 hover:text-gray-700"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground"
                 >
                   My Events
                 </button>
               </li>
               <li>
                 <div className="flex items-center">
-                  <ChevronRight className="h-5 w-5 text-accent-foreground" />
-                  <span className="ml-4 text-sm font-medium text-gray-500">{originalEvent?.title}</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground mx-2" />
+                  <span className="text-sm font-medium text-muted-foreground">{originalEvent?.title}</span>
                 </div>
               </li>
               <li>
                 <div className="flex items-center">
-                  <ChevronRight className="h-5 w-5 text-accent-foreground" />
-                  <span className="ml-4 text-sm font-medium text-gray-900">Edit</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground mx-2" />
+                  <span className="text-sm font-medium text-foreground">Edit</span>
                 </div>
               </li>
             </ol>
           </nav>
           
-          <h1 className="mt-4 text-3xl font-bold text-gray-900">Edit Event</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="mt-4 text-3xl font-bold text-foreground">Edit Event</h1>
+          <p className="mt-2 text-muted-foreground">
             Update the event details below. Be careful when changing dates and capacity.
           </p>
         </div>

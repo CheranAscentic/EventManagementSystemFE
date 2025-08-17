@@ -1,9 +1,8 @@
-import { AlertTriangle } from 'lucide-react';
+import { ChevronRight, X, ArrowLeft, Save, Trash2, Loader2 } from 'lucide-react';
 // Create Event Page component for Admin users to create new events
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, ArrowLeft, Save, Trash2, Loader2 } from 'lucide-react';
 import { apiService } from '../api';
 import type { CreateEventRequest } from '../contracts/request/EventRequests';
 import { ApiResponseHandler, ApiError, ValidationError } from '../types';
@@ -133,8 +132,8 @@ export function CreateEventPage() {
 
       const resquest : CreateEventRequest = {
         ...formData,
-        eventDate: dateUtils.formatEventDate(formData.eventDate),
-        registrationCutoffDate: dateUtils.formatEventDate(formData.registrationCutoffDate)
+        eventDate: dateUtils.formatDateForApi(new Date(formData.eventDate)),
+        registrationCutoffDate: dateUtils.formatDateForApi(new Date(formData.registrationCutoffDate)),
       }
       
       const response = await apiService.createEvent(resquest);
@@ -267,8 +266,8 @@ export function CreateEventPage() {
               </li>
               <li>
                 <div className="flex items-center">
-                  <AlertTriangle className="flex-shrink-0 h-5 w-5 text-border" />
-                  <span className="ml-4 text-sm font-medium text-foreground">Create Event</span>
+                  <ChevronRight className="flex-shrink-0 h-4 w-4 text-muted-foreground mx-2" />
+                  <span className="text-sm font-medium text-foreground">Create Event</span>
                 </div>
               </li>
             </ol>
