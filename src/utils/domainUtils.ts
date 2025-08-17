@@ -237,21 +237,126 @@ export const registrationUtils = {
 
 // API Response Utilities
 export const apiUtils = {
+  // Track retry attempts to prevent infinite loops
+  retryTracker: new Map<string, { count: number; lastAttempt: number }>(),
+  
   /**
-   * Generic API call wrapper with error handling
+   * Generic API call wrapper with error handling and smart 401 retry logic
+   * Prevents infinite retry loops for permission-based 401 errors
    */
   handleApiResponse: async <T>(
-    apiCall: () => Promise<T>
+    apiCall: () => Promise<T>,
+    requestIdentifier?: string // Optional identifier to track specific requests
   ): Promise<{ data: T | null; error: string | null }> => {
+    const requestId = requestIdentifier || Math.random().toString(36).substr(2, 9);
+    const now = Date.now();
+    
     try {
       const data = await apiCall();
+      // Clear successful request from retry tracker
+      apiUtils.retryTracker.delete(requestId);
       return { data, error: null };
     } catch (error) {
+      // Check if this is a 401 Unauthorized error
+      if (error instanceof Error && error.message.includes('401')) {
+        console.log('[apiUtils] 401 Unauthorized detected, checking retry eligibility...');
+        
+        // Check retry history for this request type
+        const retryInfo = apiUtils.retryTracker.get(requestId) || { count: 0, lastAttempt: 0 };
+        
+        // Prevent retries if:
+        // 1. Already retried once in the last 5 minutes
+        // 2. More than 1 retry attempt for this request
+        if (retryInfo.count >= 1 || (now - retryInfo.lastAttempt) < 300000) { // 5 minutes
+          console.log('[apiUtils] Retry limit reached or too recent - likely insufficient permissions');
+          apiUtils.retryTracker.delete(requestId);
+          return {
+            data: null,
+            error: 'Access denied - insufficient permissions or invalid credentials'
+          };
+        }
+        
+        // Update retry tracker
+        apiUtils.retryTracker.set(requestId, { count: retryInfo.count + 1, lastAttempt: now });
+        
+        try {
+          // Import tokenRefreshService to avoid circular dependencies
+          const { tokenRefreshService } = await import('../services');
+          
+          // Attempt to refresh tokens
+          const refreshResult = await tokenRefreshService.manualRefresh();
+          
+          if (refreshResult) {
+            console.log('[apiUtils] Token refresh successful, retrying original request...');
+            
+            try {
+              // Retry the original API call ONCE
+              const retryData = await apiCall();
+              console.log('[apiUtils] Retry after token refresh successful');
+              // Clear successful retry from tracker
+              apiUtils.retryTracker.delete(requestId);
+              return { data: retryData, error: null };
+            } catch (retryError) {
+              console.error('[apiUtils] Retry after token refresh failed:', retryError);
+              
+              // Check if the retry also failed with 401
+              if (retryError instanceof Error && retryError.message.includes('401')) {
+                console.log('[apiUtils] Second 401 detected - insufficient permissions, not retrying again');
+                apiUtils.retryTracker.delete(requestId);
+                return {
+                  data: null,
+                  error: 'Access denied - insufficient permissions for this resource'
+                };
+              }
+              
+              // For non-401 retry errors, return the actual error
+              apiUtils.retryTracker.delete(requestId);
+              return {
+                data: null,
+                error: retryError instanceof Error ? retryError.message : 'Request failed after token refresh'
+              };
+            }
+          } else {
+            console.error('[apiUtils] Token refresh failed, cannot retry request');
+            apiUtils.retryTracker.delete(requestId);
+            return {
+              data: null,
+              error: 'Authentication failed - please log in again'
+            };
+          }
+        } catch (refreshError) {
+          console.error('[apiUtils] Error during token refresh attempt:', refreshError);
+          apiUtils.retryTracker.delete(requestId);
+          return {
+            data: null,
+            error: 'Authentication failed - please log in again'
+          };
+        }
+      }
+      
+      // For non-401 errors, return the original error
       return {
         data: null,
         error: error instanceof Error ? error.message : 'Unknown error occurred'
       };
     }
+  },
+
+  /**
+   * Clear retry tracking (useful for testing or manual cleanup)
+   */
+  clearRetryTracker: (): void => {
+    apiUtils.retryTracker.clear();
+  },
+
+  /**
+   * Get current retry statistics (for debugging)
+   */
+  getRetryStats: (): { activeRetries: number; trackedRequests: string[] } => {
+    return {
+      activeRetries: apiUtils.retryTracker.size,
+      trackedRequests: Array.from(apiUtils.retryTracker.keys())
+    };
   }
 };
 

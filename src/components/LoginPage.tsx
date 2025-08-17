@@ -5,9 +5,10 @@ import { apiService } from '../api';
 import { ApiResponseHandler, ValidationError, FormValidationHelper } from '../types';
 import type { LoginRequest } from '../contracts';
 import type { AppUser } from '../models';
+import { decodeJwtToAppUser } from '../utils/jwtUtils'
 
 interface LoginPageProps {
-  onLoginSuccess?: (user: AppUser, token?: string) => void;
+  onLoginSuccess?: (user: AppUser, authToken?: string, refreshToken?: string, authTokenExp?: string, refreshTokenExp?: string) => void;
 }
 
 export function LoginPage({ onLoginSuccess }: LoginPageProps) {
@@ -57,27 +58,26 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
       const response = await apiService.login({ email, password });
       console.log('Login response:', response);
       
-      // Use ApiResponseHandler to process the response
       const loginData = ApiResponseHandler.handleResponse(response);
       console.log('Login successful:', loginData);
       
-      // Extract user and token from the response
-      // The user data is directly in loginData, not nested under loginData.user
-      const user: AppUser = {
-        userId: loginData.id,
-        email: loginData.email,
-        userName: loginData.userName,
-        firstName: loginData.firstName,
-        lastName: loginData.lastName,
-        userRole: loginData.userRole,
-        phoneNumber: loginData.phoneNumber,
-        token: loginData.token,
-        tokenExpiration: loginData.tokenExpiration
-      };
-      const token = loginData.token;
+      // Decode user and handle null case
+      const decodedUser = decodeJwtToAppUser(loginData.authToken)!;
       
-      // Handle successful login
-      onLoginSuccess?.(user, token);
+      if (!decodedUser) {
+        setError('Failed to decode user information. Please try again.');
+        return;
+      }
+      
+      const user: AppUser = decodedUser;
+      const authToken = loginData.authToken;
+      const refreshToken = loginData.refreshToken;
+      const authTokenExp = loginData.authTokenExp;
+      const refreshTokenExp = loginData.refreshTokenExp;
+      
+      // REMOVED: Token setting (App.tsx handles this via onLoginSuccess)
+      // Handle successful login - App.tsx will manage tokens
+      onLoginSuccess?.(user, authToken, refreshToken, authTokenExp, refreshTokenExp);
       
       // Redirect to home page or dashboard
       navigate('/');
