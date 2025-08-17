@@ -5,6 +5,10 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface RefreshRequest {
+  refreshToken: string;
+}
+
 export interface RegisterUserRequest {
   email: string;
   password: string;
