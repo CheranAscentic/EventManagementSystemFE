@@ -12,6 +12,104 @@
   line-clamp: 2;
 }
 
+/* FullCalendar Custom Styles */
+.fc {
+  font-family: inherit;
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border-color: hsl(var(--border));
+}
+
+.fc-theme-standard .fc-scrollgrid {
+  border-color: hsl(var(--border));
+}
+
+.fc-button-primary {
+  background-color: hsl(var(--primary)) !important;
+  border-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+.fc-button-primary:hover {
+  background-color: hsl(var(--primary) / 0.9) !important;
+  border-color: hsl(var(--primary) / 0.9) !important;
+}
+
+.fc-button-primary:disabled {
+  background-color: hsl(var(--muted)) !important;
+  border-color: hsl(var(--muted)) !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.fc-col-header-cell {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.fc-daygrid-day {
+  background-color: hsl(var(--background));
+}
+
+.fc-daygrid-day:hover {
+  background-color: hsl(var(--accent));
+}
+
+.fc-timegrid-slot {
+  border-color: hsl(var(--border));
+}
+
+.fc-timegrid-slot-minor {
+  border-color: hsl(var(--border) / 0.5);
+}
+
+.fc-event {
+  border-radius: 4px;
+  border: none !important;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.fc-event:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.fc-today-button,
+.fc-prev-button,
+.fc-next-button {
+  background-color: hsl(var(--secondary)) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+.fc-today-button:hover,
+.fc-prev-button:hover,
+.fc-next-button:hover {
+  background-color: hsl(var(--accent)) !important;
+}
+
+.fc-toolbar-title {
+  color: hsl(var(--foreground)) !important;
+}
+
+.fc-timegrid-axis-cushion,
+.fc-timegrid-slot-label-cushion {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.fc-select-range {
+  background-color: hsl(var(--primary) / 0.1) !important;
+}
+
+/* Dark mode adjustments */
+.dark .fc-daygrid-day {
+  background-color: hsl(var(--background));
+}
+
+.dark .fc-daygrid-day:hover {
+  background-color: hsl(var(--accent));
+}
+
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
@@ -75,71 +173,90 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(0.98 0.02 220);  /* Very light pastel blue background */
-  --foreground: oklch(0.15 0.05 220);  /* Dark blue for main text */
-  --card: oklch(0.995 0.01 220);       /* Almost white with hint of blue for cards */
-  --card-foreground: oklch(0.15 0.05 220);  /* Dark blue for card text */
-  --popover: oklch(0.995 0.01 220);    /* Same as card for consistency */
-  --popover-foreground: oklch(0.15 0.05 220);  /* Dark blue for popover text */
-  --primary: oklch(0.55 0.15 220);     /* Medium pastel blue for primary actions */
-  --primary-foreground: oklch(0.98 0.01 220);  /* Light text on primary */
-  --secondary: oklch(0.92 0.03 220);   /* Light pastel blue for secondary elements */
-  --secondary-foreground: oklch(0.25 0.08 220);  /* Darker blue for secondary text */
-  --muted: oklch(0.92 0.03 220);       /* Same as secondary for consistency */
-  --muted-foreground: oklch(0.45 0.08 220);    /* Medium blue for muted text */
-  --accent: oklch(0.85 0.05 220);      /* Slightly more saturated blue for accents */
-  --accent-foreground: oklch(0.15 0.05 220);   /* Dark blue for accent text */
-  --destructive: oklch(0.65 0.18 10);  /* Soft red for destructive actions */
-  --border: oklch(0.88 0.04 220);      /* Light blue border */
-  --input: oklch(0.88 0.04 220);       /* Same as border for input fields */
-  --ring: oklch(0.55 0.15 220);        /* Primary blue for focus rings */
-  --chart-1: oklch(0.65 0.12 200);     /* Blue chart color */
-  --chart-2: oklch(0.6 0.1 180);       /* Cyan chart color */
-  --chart-3: oklch(0.55 0.08 240);     /* Purple-blue chart color */
-  --chart-4: oklch(0.7 0.1 160);       /* Teal chart color */
-  --chart-5: oklch(0.75 0.08 140);     /* Green-blue chart color */
-  --sidebar: oklch(0.96 0.02 220);     /* Slightly darker than background */
-  --sidebar-foreground: oklch(0.15 0.05 220);  /* Dark blue for sidebar text */
-  --sidebar-primary: oklch(0.55 0.15 220);     /* Primary blue for sidebar */
-  --sidebar-primary-foreground: oklch(0.98 0.01 220);  /* Light text on sidebar primary */
-  --sidebar-accent: oklch(0.92 0.03 220);      /* Light blue for sidebar accents */
-  --sidebar-accent-foreground: oklch(0.25 0.08 220);   /* Dark blue for sidebar accent text */
-  --sidebar-border: oklch(0.88 0.04 220);      /* Light blue sidebar border */
-  --sidebar-ring: oklch(0.55 0.15 220);        /* Primary blue for sidebar focus */
+
+  /* Base / Neutral */
+  --background: oklch(0.98 0.005 230);  /* Very light pastel blue */
+  --foreground: oklch(0.22 0.01 230);   /* Soft muted blue-gray for text */
+
+  /* Cards / Containers */
+  --card: oklch(0.99 0.003 230);        /* Off-white with pastel blue tint */
+  --card-foreground: oklch(0.22 0.01 230);
+
+  --popover: oklch(0.99 0.003 230);
+  --popover-foreground: oklch(0.22 0.01 230);
+
+  /* Primary CTA */
+  --primary: oklch(52.76% 0.11093 237.684);      /* Pastel blue */
+  --primary-foreground: oklch(0.98 0.003 230); /* Soft white text on primary */
+
+  /* Secondary / Muted */
+  --secondary: oklch(0.96 0.003 230);   /* Very light pastel blue */
+  --secondary-foreground: oklch(0.32 0.01 230); /* Muted blue-gray */
+
+  --muted: oklch(0.95 0.003 230);       /* Light muted pastel blue */
+  --muted-foreground: oklch(0.45 0.008 230); /* Soft muted blue text */
+
+  /* Accent (new contrast color) */
+  --accent: oklch(0.85 0.04 210);       /* Pastel blue-teal */
+  --accent-foreground: oklch(0.22 0.01 230);
+
+  /* Destructive */
+  --destructive: oklch(0.85 0.04 25);    /* Soft pastel red */
+  --border: oklch(0.93 0.003 230);      /* Very soft pastel blue border */
+  --input: oklch(0.93 0.003 230);
+  --ring: oklch(0.75 0.06 230);         /* Pastel blue for focus */
+
+  /* Charts */
+  --chart-1: oklch(0.8 0.04 230);       /* Pastel blue */
+  --chart-2: oklch(0.8 0.03 210);       /* Pastel blue-teal */
+  --chart-3: oklch(0.78 0.04 250);      /* Pastel lavender-blue */
+  --chart-4: oklch(0.85 0.03 200);      /* Pastel teal */
+  --chart-5: oklch(0.88 0.02 180);      /* Pastel green-blue */
+
+  /* Sidebar */
+  --sidebar: oklch(0.97 0.003 230);
+  --sidebar-foreground: oklch(0.22 0.01 230);
+  --sidebar-primary: oklch(0.75 0.06 230);
+  --sidebar-primary-foreground: oklch(0.98 0.003 230);
+  --sidebar-accent: oklch(0.95 0.003 230);
+  --sidebar-accent-foreground: oklch(0.32 0.01 230);
+  --sidebar-border: oklch(0.93 0.003 230);
+  --sidebar-ring: oklch(0.75 0.06 230);
 }
 
+
 .dark {
-  --background: oklch(0.12 0.05 220);        /* Dark blue background */
-  --foreground: oklch(0.92 0.02 220);        /* Light blue-white text */
-  --card: oklch(0.18 0.06 220);              /* Slightly lighter dark blue for cards */
-  --card-foreground: oklch(0.92 0.02 220);   /* Light blue-white for card text */
-  --popover: oklch(0.18 0.06 220);           /* Same as card */
-  --popover-foreground: oklch(0.92 0.02 220); /* Light blue-white for popover text */
-  --primary: oklch(0.65 0.15 220);           /* Brighter pastel blue for primary in dark */
-  --primary-foreground: oklch(0.12 0.05 220); /* Dark background color for text on primary */
-  --secondary: oklch(0.25 0.08 220);         /* Medium dark blue for secondary */
-  --secondary-foreground: oklch(0.85 0.03 220); /* Light blue for secondary text */
-  --muted: oklch(0.25 0.08 220);             /* Same as secondary */
-  --muted-foreground: oklch(0.65 0.08 220);  /* Medium light blue for muted text */
-  --accent: oklch(0.35 0.1 220);             /* Medium blue for accents */
-  --accent-foreground: oklch(0.92 0.02 220); /* Light blue-white for accent text */
-  --destructive: oklch(0.7 0.15 15);         /* Softer red for dark mode */
-  --border: oklch(0.3 0.08 220);             /* Medium dark blue border */
-  --input: oklch(0.25 0.08 220);             /* Slightly darker for input fields */
-  --ring: oklch(0.65 0.15 220);              /* Bright blue for focus rings */
-  --chart-1: oklch(0.7 0.12 200);           /* Brighter blue chart color */
-  --chart-2: oklch(0.65 0.1 180);           /* Brighter cyan chart color */
-  --chart-3: oklch(0.6 0.08 240);           /* Brighter purple-blue chart color */
-  --chart-4: oklch(0.75 0.1 160);           /* Brighter teal chart color */
-  --chart-5: oklch(0.8 0.08 140);           /* Brighter green-blue chart color */
-  --sidebar: oklch(0.15 0.06 220);          /* Slightly lighter than background */
-  --sidebar-foreground: oklch(0.92 0.02 220); /* Light blue-white for sidebar text */
-  --sidebar-primary: oklch(0.65 0.15 220);  /* Bright blue for sidebar primary */
-  --sidebar-primary-foreground: oklch(0.12 0.05 220); /* Dark text on sidebar primary */
-  --sidebar-accent: oklch(0.25 0.08 220);   /* Medium dark blue for sidebar accents */
-  --sidebar-accent-foreground: oklch(0.85 0.03 220); /* Light blue for sidebar accent text */
-  --sidebar-border: oklch(0.3 0.08 220);    /* Medium dark blue sidebar border */
-  --sidebar-ring: oklch(0.65 0.15 220);     /* Bright blue for sidebar focus */
+  --background: oklch(0.18 0.01 230);        /* Pastel dark blue background */
+  --foreground: oklch(0.85 0.005 230);       /* Soft pastel light text */
+  --card: oklch(0.22 0.008 230);             /* Pastel dark blue for cards */
+  --card-foreground: oklch(0.85 0.005 230);  /* Soft pastel light text for cards */
+  --popover: oklch(0.22 0.008 230);          /* Same as card */
+  --popover-foreground: oklch(0.85 0.005 230); /* Soft pastel light text for popover */
+  --primary: oklch(78.19% 0.12821 233.835);           /* Pastel blue for primary */
+  --primary-foreground: oklch(0.18 0.01 230); /* Soft pastel dark text on primary */
+  --secondary: oklch(0.32 0.01 230);         /* Pastel medium blue */
+  --secondary-foreground: oklch(0.85 0.005 230); /* Soft pastel light blue text */
+  --muted: oklch(0.32 0.01 230);             /* Same as secondary */
+  --muted-foreground: oklch(0.65 0.008 230); /* Soft pastel medium light blue text */
+  --accent: oklch(0.45 0.02 210);            /* Pastel blue-teal for accents */
+  --accent-foreground: oklch(0.85 0.005 230); /* Soft pastel light text for accent */
+  --destructive: oklch(0.85 0.04 25);        /* Pastel red for dark mode */
+  --border: oklch(0.28 0.008 230);           /* Pastel medium blue border */
+  --input: oklch(0.32 0.01 230);             /* Pastel input field background */
+  --ring: oklch(0.75 0.06 230);              /* Pastel blue for focus rings */
+  --chart-1: oklch(0.8 0.04 230);            /* Pastel blue chart color */
+  --chart-2: oklch(0.8 0.03 210);            /* Pastel blue-teal chart color */
+  --chart-3: oklch(0.78 0.04 250);           /* Pastel lavender-blue chart color */
+  --chart-4: oklch(0.85 0.03 200);           /* Pastel teal chart color */
+  --chart-5: oklch(0.88 0.02 180);           /* Pastel green-blue chart color */
+  --sidebar: oklch(0.22 0.008 230);          /* Pastel sidebar background */
+  --sidebar-foreground: oklch(0.85 0.005 230); /* Soft pastel light text for sidebar */
+  --sidebar-primary: oklch(0.75 0.06 230);   /* Pastel blue for sidebar primary */
+  --sidebar-primary-foreground: oklch(0.18 0.01 230); /* Soft pastel dark text on sidebar primary */
+  --sidebar-accent: oklch(0.32 0.01 230);    /* Pastel medium blue for sidebar accents */
+  --sidebar-accent-foreground: oklch(0.85 0.005 230); /* Soft pastel light blue for sidebar accent text */
+  --sidebar-border: oklch(0.28 0.008 230);   /* Pastel medium blue sidebar border */
+  --sidebar-ring: oklch(0.75 0.06 230);      /* Pastel blue for sidebar focus */
 }
 
 @layer base {

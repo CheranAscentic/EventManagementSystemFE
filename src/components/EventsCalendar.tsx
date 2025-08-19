@@ -136,7 +136,7 @@ export function EventsCalendar() {
     id: event.id,
     title: event.title,
     start: event.eventDate, // Use full datetime for proper week view positioning
-    backgroundColor: eventUtils.canRegister(event) ? '#10b981' : '#ef4444', // Green if available, red if not
+    backgroundColor: eventUtils.canRegister(event) ? '#71BA91' : '#BD7676', // Green if available, red if not
     borderColor: eventUtils.canRegister(event) ? '#059669' : '#dc2626',
     textColor: 'white',
     extendedProps: {

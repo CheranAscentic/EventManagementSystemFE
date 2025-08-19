@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
-import { Navigation, HomePage, LoginPage, RegisterPage, EventsPage, EventDetailPage, CreateEventPage, EditEventPage, MyRegistrationsPage } from './components'
+import { Navigation, HomePage, LoginPage, RegisterPage, EventsPage, EventDetailPage, CreateEventPage, CreateComplexEventPage, EditEventPage, MyRegistrationsPage } from './components'
 import { OwnerEventsPage } from './components/OwnerEventsPage'
 import { EventDashboard } from './components/EventDashboard'
 import { apiService } from './api'
@@ -186,6 +186,7 @@ function App() {
               <Route path="/manage-events" element={<div className="p-8 text-center">Manage Events page coming soon!</div>} />
               <Route path="/dashboard" element={<div className="p-8 text-center">Dashboard page coming soon!</div>} />
               <Route path="/admin/create-event" element={<CreateEventPage />} />
+              <Route path="/admin/create-complex-event" element={<CreateComplexEventPage />} />
               <Route path="/admin/edit-event/:eventId" element={<EditEventPage />} />
               <Route path="*" element={<div className="p-8 text-center">Page not found!</div>} />
             </Routes>
