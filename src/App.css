@@ -201,14 +201,16 @@
   --accent-foreground: oklch(0.22 0.01 230);
 
   /* Destructive */
-  --destructive: oklch(0.85 0.04 25);    /* Soft pastel red */
+  /*--destructive: oklch(0.85 0.04 25);     Soft pastel red */
+  --destructive: oklch(64.131% 0.08965 19.785);
   --border: oklch(0.93 0.003 230);      /* Very soft pastel blue border */
   --input: oklch(0.93 0.003 230);
   --ring: oklch(0.75 0.06 230);         /* Pastel blue for focus */
 
   /* Charts */
   --chart-1: oklch(0.8 0.04 230);       /* Pastel blue */
-  --chart-2: oklch(0.8 0.03 210);       /* Pastel blue-teal */
+  /*--chart-2: oklch(0.8 0.03 210);       Pastel blue-teal */
+  --chart-2: oklch(72.95% 0.0952 158.345);
   --chart-3: oklch(0.78 0.04 250);      /* Pastel lavender-blue */
   --chart-4: oklch(0.85 0.03 200);      /* Pastel teal */
   --chart-5: oklch(0.88 0.02 180);      /* Pastel green-blue */

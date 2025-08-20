@@ -51,20 +51,6 @@ function App() {
           setCurrentUser(user);
           setIsLoggedIn(true);
           
-          // Start automatic token refresh service for existing sessions
-          tokenRefreshService.start(
-            // On successful token refresh, update current user
-            (refreshedUser: AppUser) => {
-              setCurrentUser(refreshedUser);
-              console.log('Token refreshed automatically, user updated:', refreshedUser);
-            },
-            // On token refresh failure, logout user
-            () => {
-              console.log('Token refresh failed, logging out user');
-              handleLogout();
-            }
-          );
-          
           console.log('Token refresh successful, user logged in');
           return true;
         }
@@ -76,7 +62,7 @@ function App() {
       console.error('Error during token refresh:', error);
       return false;
     }
-  }, [setCurrentUser, setIsLoggedIn, handleLogout]);
+  }, [setCurrentUser, setIsLoggedIn]);
 
   // Check for existing authentication on app load
   useEffect(() => {
@@ -91,7 +77,22 @@ function App() {
         console.log('Refresh token found, attempting to refresh credentials');
         const success = await attemptTokenRefresh();
         
-        if (!success) {
+        if (success) {
+          // Start automatic token refresh service for existing sessions
+          tokenRefreshService.start(
+            // On successful token refresh, update current user
+            (refreshedUser: AppUser) => {
+              setCurrentUser(refreshedUser);
+              console.log('Token refreshed automatically, user updated:', refreshedUser);
+            },
+            // On token refresh failure, logout user
+            () => {
+              console.log('Token refresh failed, logging out user');
+              handleLogout();
+            }
+          );
+          console.log('Token refresh service started for existing session');
+        } else {
           console.log('Could not refresh tokens, continuing as guest');
         }
       } else {
@@ -102,7 +103,7 @@ function App() {
     };
 
     initializeAuth();
-  }, [attemptTokenRefresh]);
+  }, [attemptTokenRefresh, handleLogout]);
 
   // SIMPLIFIED: Just use ApiService
   const handleLoginSuccess = (user: AppUser, authToken?: string, refreshToken?: string, authTokenExp?: string, refreshTokenExp?: string) => {
