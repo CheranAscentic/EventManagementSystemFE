@@ -12,13 +12,23 @@ export function EventsPage() {
   const [eventTypes, setEventTypes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // Filter form state (what user is typing/selecting)
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(9); // Fixed items per page
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  
+  // Applied filter state (what's actually being used for API calls)
+  const [appliedSearchTerm, setAppliedSearchTerm] = useState('');
+  const [appliedSelectedType, setAppliedSelectedType] = useState('');
+  const [appliedSelectedStatus, setAppliedSelectedStatus] = useState('');
+  const [appliedStartDate, setAppliedStartDate] = useState('');
+  const [appliedEndDate, setAppliedEndDate] = useState('');
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(9); // Fixed items per page
   const navigate = useNavigate();
 
   const loadEventTypes = async () => {
@@ -32,6 +42,38 @@ export function EventsPage() {
     }
   };
 
+  const loadInitialEvents = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const request = {
+        itemsPerPage,
+        pageNumber: 1,
+      };
+      
+      const response = await apiService.getEventsExtended(request);
+      
+      if (response.isSuccess && response.value) {
+        console.log('Initial events loaded:', response.value);
+        setPaginatedResult(response.value);
+      } else {
+        setError(response.message || 'Failed to load events');
+        setPaginatedResult(null);
+      }
+    } catch (error) {
+      console.error('Error loading initial events:', error);
+      if (error instanceof ApiError) {
+        setError(error.message);
+      } else {
+        setError('Failed to load events. Please try again.');
+      }
+      setPaginatedResult(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [itemsPerPage]);
+
   const loadEvents = useCallback(async () => {
     try {
       setLoading(true);
@@ -40,10 +82,10 @@ export function EventsPage() {
       const request = {
         itemsPerPage,
         pageNumber: currentPage,
-        ...(searchTerm.trim().length >= 2 && { searchTerm: searchTerm.trim() }),
-        ...(selectedType && { eventType: selectedType }),
-        ...(startDate && { startDate: new Date(startDate).toISOString() }),
-        ...(endDate && { endDate: new Date(endDate).toISOString() }),
+        ...(appliedSearchTerm.trim().length >= 2 && { searchTerm: appliedSearchTerm.trim() }),
+        ...(appliedSelectedType && { eventType: appliedSelectedType }),
+        ...(appliedStartDate && { startDate: new Date(appliedStartDate).toISOString() }),
+        ...(appliedEndDate && { endDate: new Date(appliedEndDate).toISOString() }),
       };
       
       const response = await apiService.getEventsExtended(request);
@@ -66,15 +108,20 @@ export function EventsPage() {
     } finally {
       setLoading(false);
     }
-  }, [itemsPerPage, currentPage, searchTerm, selectedType, startDate, endDate]);
+  }, [itemsPerPage, currentPage, appliedSearchTerm, appliedSelectedType, appliedStartDate, appliedEndDate]);
 
   useEffect(() => {
     loadEventTypes();
-  }, []);
+    // Load initial events without filters
+    loadInitialEvents();
+  }, [loadInitialEvents]);
 
   useEffect(() => {
-    loadEvents();
-  }, [loadEvents]);
+    // Only load filtered events when applied filters change and we have at least one filter
+    if (appliedSearchTerm || appliedSelectedType || appliedSelectedStatus || appliedStartDate || appliedEndDate || currentPage > 1) {
+      loadEvents();
+    }
+  }, [loadEvents, appliedSearchTerm, appliedSelectedType, appliedSelectedStatus, appliedStartDate, appliedEndDate, currentPage]);
 
   const handleEventClick = (eventId: string) => {
     navigate(`/event/${eventId}?source=events`);
@@ -86,7 +133,21 @@ export function EventsPage() {
     setSelectedStatus('');
     setStartDate('');
     setEndDate('');
+    setAppliedSearchTerm('');
+    setAppliedSelectedType('');
+    setAppliedSelectedStatus('');
+    setAppliedStartDate('');
+    setAppliedEndDate('');
     setCurrentPage(1);
+  };
+
+  const handleSearch = () => {
+    setAppliedSearchTerm(searchTerm);
+    setAppliedSelectedType(selectedType);
+    setAppliedSelectedStatus(selectedStatus);
+    setAppliedStartDate(startDate);
+    setAppliedEndDate(endDate);
+    setCurrentPage(1); // Reset to first page when searching
   };
 
   const handlePageChange = (newPage: number) => {
@@ -95,17 +156,14 @@ export function EventsPage() {
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
-    setCurrentPage(1); // Reset to first page when searching
   };
 
   const handleTypeChange = (value: string) => {
     setSelectedType(value);
-    setCurrentPage(1); // Reset to first page when filtering
   };
 
   const handleStatusChange = (value: string) => {
     setSelectedStatus(value);
-    setCurrentPage(1); // Reset to first page when filtering
   };
 
   // Get the events from paginated result
@@ -149,6 +207,7 @@ export function EventsPage() {
                   placeholder="Search by title, description, or location..."
                   value={searchTerm}
                   onChange={(e) => handleSearchChange(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -223,34 +282,51 @@ export function EventsPage() {
             </div>
           </div>
 
-          {/* Filter Summary and Clear */}
-          {(searchTerm || selectedType || selectedStatus || startDate || endDate) && (
+          {/* Search and Clear Buttons */}
+          <div className="mt-6 flex gap-3">
+            <button
+              onClick={handleSearch}
+              className="bg-blue-600 text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors flex items-center"
+            >
+              <Search className="h-4 w-4 mr-2" />
+              Search Events
+            </button>
+            <button
+              onClick={clearFilters}
+              className="bg-gray-200 text-gray-700 px-6 py-2 rounded-md text-sm font-medium hover:bg-gray-300 transition-colors"
+            >
+              Clear All
+            </button>
+          </div>
+
+          {/* Filter Summary */}
+          {(appliedSearchTerm || appliedSelectedType || appliedSelectedStatus || appliedStartDate || appliedEndDate) && (
             <div className="mt-4 flex items-center justify-between pt-4 border-t border-gray-200">
               <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <span>Showing {events.length} of {totalCount} events</span>
-                {searchTerm && (
+                {appliedSearchTerm && (
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                    Search: "{searchTerm}"
+                    Search: "{appliedSearchTerm}"
                   </span>
                 )}
-                {selectedType && (
+                {appliedSelectedType && (
                   <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">
-                    Type: {selectedType}
+                    Type: {appliedSelectedType}
                   </span>
                 )}
-                {selectedStatus && (
+                {appliedSelectedStatus && (
                   <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded">
-                    Status: {selectedStatus}
+                    Status: {appliedSelectedStatus}
                   </span>
                 )}
-                {startDate && (
+                {appliedStartDate && (
                   <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
-                    From: {new Date(startDate).toLocaleDateString()}
+                    From: {new Date(appliedStartDate).toLocaleDateString()}
                   </span>
                 )}
-                {endDate && (
+                {appliedEndDate && (
                   <span className="bg-red-100 text-red-800 px-2 py-1 rounded">
-                    Until: {new Date(endDate).toLocaleDateString()}
+                    Until: {new Date(appliedEndDate).toLocaleDateString()}
                   </span>
                 )}
               </div>
@@ -290,11 +366,11 @@ export function EventsPage() {
             <Calendar className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">No events found</h3>
             <p className="mt-1 text-sm text-gray-500">
-              {searchTerm || selectedType || selectedStatus || startDate || endDate
+              {appliedSearchTerm || appliedSelectedType || appliedSelectedStatus || appliedStartDate || appliedEndDate
                 ? 'Try adjusting your search criteria.'
                 : 'No events are available at the moment.'}
             </p>
-            {(searchTerm || selectedType || selectedStatus || startDate || endDate) && (
+            {(appliedSearchTerm || appliedSelectedType || appliedSelectedStatus || appliedStartDate || appliedEndDate) && (
               <button
                 onClick={clearFilters}
                 className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"

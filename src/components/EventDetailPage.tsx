@@ -5,6 +5,7 @@ import { apiService } from '../api';
 import { ApiResponseHandler, ApiError } from '../types';
 import type { Event, AppUser } from '../models';
 import { eventUtils, dateUtils } from '../lib/utils';
+import { AcknowledgePopup } from './PopupModal';
 
 interface EventDetailPageProps {
   currentUser: AppUser | null;
@@ -25,6 +26,8 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
   });
   const navigate = useNavigate();
   const [userIsRegistered, setUserIsRegistered] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Get the source parameter to determine where to navigate back to
   const source = searchParams.get('source');
@@ -158,9 +161,10 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
       // Reload event to get updated registration count
       await loadEvent(event.id);
       
-      // Close form and show success
+      // Close form and show success modal
       setShowRegistrationForm(false);
-      alert(`Successfully registered for "${event.title}"! You should receive a confirmation email shortly.`);
+      setSuccessMessage(`Successfully registered for "${event.title}"! You should receive a confirmation email shortly.`);
+      setShowSuccessModal(true);
       
     } catch (error) {
       console.error('Registration failed:', error);
@@ -197,6 +201,11 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
         phone: currentUser.phoneNumber || ''
       });
     }
+  };
+
+  const handleSuccessModalOk = () => {
+    setShowSuccessModal(false);
+    setSuccessMessage('');
   };
 
   if (loading) {
@@ -558,6 +567,15 @@ export function EventDetailPage({ currentUser }: EventDetailPageProps) {
           </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      <AcknowledgePopup
+        isOpen={showSuccessModal}
+        title="Registration Successful"
+        message={successMessage}
+        onOk={handleSuccessModalOk}
+        okText="OK"
+      />
     </div>
   );
 }

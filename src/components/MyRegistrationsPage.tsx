@@ -8,6 +8,7 @@ import type { EventRegistration, Event, AppUser } from '../models';
 import { dateUtils } from '../lib/utils';
 import { downloadEventCalendar } from '../lib/icsUtils';
 import { ClipboardX } from 'lucide-react';
+import { WarnPopup } from './PopupModal';
 
 interface MyRegistrationsPageProps {
   currentUser: AppUser | null;
@@ -25,6 +26,8 @@ export function MyRegistrationsPage({ currentUser }: MyRegistrationsPageProps) {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'active' | 'canceled' | 'all'>('active');
   const [cancelingRegistration, setCancelingRegistration] = useState<string | null>(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [registrationToCancel, setRegistrationToCancel] = useState<RegistrationWithEvent | null>(null);
 
   const loadUserRegistrations = useCallback(async () => {
     if (!currentUser) return;
@@ -93,18 +96,20 @@ export function MyRegistrationsPage({ currentUser }: MyRegistrationsPageProps) {
   const handleCancelRegistration = async (registration: RegistrationWithEvent) => {
     if (!currentUser) return;
     
-    const confirmCancel = window.confirm(
-      `Are you sure you want to cancel your registration for "${registration.event?.title || 'this event'}"?`
-    );
+    setRegistrationToCancel(registration);
+    setShowCancelModal(true);
+  };
+
+  const confirmCancelRegistration = async () => {
+    if (!currentUser || !registrationToCancel) return;
     
-    if (!confirmCancel) return;
-    
-    setCancelingRegistration(registration.id);
+    setCancelingRegistration(registrationToCancel.id);
+    setShowCancelModal(false);
     
     try {
-      console.log('Canceling registration:', registration.id);
+      console.log('Canceling registration:', registrationToCancel.id);
       
-      const response = await apiService.cancelEventRegistration(registration.id, {
+      const response = await apiService.cancelEventRegistration(registrationToCancel.id, {
         appUserId: currentUser.userId
       });
       
@@ -125,7 +130,13 @@ export function MyRegistrationsPage({ currentUser }: MyRegistrationsPageProps) {
       }
     } finally {
       setCancelingRegistration(null);
+      setRegistrationToCancel(null);
     }
+  };
+
+  const cancelCancelRegistration = () => {
+    setShowCancelModal(false);
+    setRegistrationToCancel(null);
   };
 
   const handleViewEvent = (eventId: string) => {
@@ -503,6 +514,18 @@ export function MyRegistrationsPage({ currentUser }: MyRegistrationsPageProps) {
           </div>
         )}
       </div>
+
+      {/* Cancel Registration Modal */}
+      <WarnPopup
+        isOpen={showCancelModal}
+        title="Cancel Registration"
+        message={`Are you sure you want to cancel your registration for "${registrationToCancel?.event?.title || 'this event'}"?`}
+        onConfirm={confirmCancelRegistration}
+        onCancel={cancelCancelRegistration}
+        isLoading={cancelingRegistration === registrationToCancel?.id}
+        confirmText="Cancel Registration"
+        cancelText="Keep Registration"
+      />
     </div>
   );
 }

@@ -9,3 +9,4 @@ export { CreateEventPage } from './CreateEventPage';
 export { CreateComplexEventPage } from './CreateComplexEventPage';
 export { EditEventPage } from './EditEventPage';
 export { MyRegistrationsPage } from './MyRegistrationsPage';
+export { WarnPopup, AcknowledgePopup } from './PopupModal';
